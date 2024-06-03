@@ -1,14 +1,21 @@
 clc; clear all;
 ##variables (se pueden cambiar)
-
-
-##canciones = {"canc1", "canc2"};
-##canciones = cargar_canciones();
-##seleccion = menu("Elige una cancion", canciones);
-seleccion = input("Elige una cancion, del 1 al 1: ");
-archivo_audio = select_sample(seleccion); %numero de archivo, del 1 al ...
 duracion = 0.5; %cantidad de minutos a leer del archivo
 
+
+
+## Codigo
+canciones = cargar_canciones();
+seleccion = menu("Elige una cancion", canciones);
+
+if seleccion > 0
+  nombre_archivo = canciones{seleccion};
+  disp(["Has seleccionado: ", nombre_archivo]);
+else
+  disp("No has seleccionado ninguna canción.");
+endif
+
+archivo_audio = strcat("../samples/",nombre_archivo);
 
 
 % Cargar la cantidad de minutos especificados
@@ -16,7 +23,7 @@ info = audioinfo(archivo_audio);
 duracion_segundos = duracion * 60;
 n_muestras = fix(duracion_segundos * info.SampleRate);
 if info.TotalSamples < n_muestras
-  error('El archivo es mas corto que la duracion especificada');
+  error("El archivo es mas corto que la duracion especificada");
 endif
 
 
@@ -27,6 +34,8 @@ if size(y ,2) == 2
   y = (y(:,1) + y(:,2)) / 2;
 endif
 
+
+plot(y);
 
 %ventana para transformada de fourier de corto tiempo: 10ms (por que 10? se podria calcular este valor?)
 %analizo la transformada de fourier en ventanas de 10 ms para detectar

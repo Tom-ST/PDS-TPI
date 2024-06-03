@@ -1,7 +1,9 @@
 function lista = cargar_canciones()
   archivos = dir("../samples/");
-  for i=1:length(archivos)
-    archivos(i).name;
+  lista = {};
+
+  for i=3:length(archivos)
+    lista(end+1) = archivos(i).name;
   endfor
 endfunction
 
