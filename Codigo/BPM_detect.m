@@ -1,4 +1,4 @@
-archivo_audio = '../Samples/Canon_in_D.mp3';
+archivo_audio = '../samples/Canon_in_D.mp3';
 
 
 
