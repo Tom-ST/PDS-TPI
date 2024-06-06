@@ -2,7 +2,6 @@ clc; clear all;
 ##variables (se pueden cambiar)
 duracion = 0.01; %cantidad de minutos a leer del archivo
 
-##MUY BUENAS A TODOS
 
 ## Codigo
 canciones = cargar_canciones();
