@@ -80,42 +80,26 @@ title("Transformada de fourier para una cierta fila")
 
 
 % Calculo del flujo de la energia
+% Encontrar los índices correspondientes a 100 Hz y 10000 Hz
+frecuencia_100Hz = 100;
+frecuencia_10000Hz = 10000;
+
+indice_100Hz = round(frecuencia_100Hz * tam_ventana_m / Fs);
+indice_10000Hz = round(frecuencia_10000Hz * tam_ventana_m / Fs);
+
 E_hat = zeros(num_ventanas - 1, 1); % Se resta 1 porque se calcula la diferencia entre frames sucesivos
 
 for i = 2:num_ventanas
-  E_hat(i-1) = sum(fft_resultados(i, :) - fft_resultados(i-1, :));
+  E_hat(i-1) = sum(fft_resultados(i, indice_100Hz:indice_10000Hz) - fft_resultados(i-1, indice_100Hz:indice_10000Hz));
 endfor
 
 % Rectificacion media onda
 E = max(E_hat, 0);
 
-f_m = info.SampleRate #frecuencia de muestreo
+f_m = info.SampleRate; %frecuencia de muestreo
 
 figure;
 plot(E);
 xlabel("Frames");
 ylabel("Flujo de energía");
 title("Flujo de energía en función del tiempo");
-
-
-
-
-##
-##E_hat = zeros(1, num_ventanas - 1);
-##for i = 2:num_ventanas
-##  E_hat(i-1) = sum(fft_resultados(i, :) - fft_resultados(i-1, :));
-##endfor
-##
-##E = max(E_hat, 0); % toma los valores positivos 2da ecuacion del paper
-##
-##% Graficar el flujo de energía
-##tiempo_ventanas = (1:length(E)) * (desplazamiento / Fs);
-##
-##figure;
-##plot(tiempo_ventanas, E);
-##xlabel("Tiempo en segundos");
-##ylabel("Flujo de Energía E(n)");
-##
-##
-
-
