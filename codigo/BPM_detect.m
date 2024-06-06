@@ -1,7 +1,9 @@
 clc; clear all;
 ##variables (se pueden cambiar)
-duracion = 0.5; %cantidad de minutos a leer del archivo
+duracion = 0.1; %cantidad de minutos a leer del archivo
 
+t_ini = 10; #Segundo que se comienza a analizar la cancion
+t_fin = 15; #Termina el analisis
 
 ## Codigo
 canciones = cargar_canciones();
@@ -20,15 +22,24 @@ archivo_audio = strcat("../samples/",nombre_archivo);
 
 % Cargar la cantidad de minutos especificados
 info = audioinfo(archivo_audio);
-duracion_segundos = duracion * 60;
-n_muestras = fix(duracion_segundos * info.SampleRate);
-if info.TotalSamples < n_muestras
-  error("El archivo es mas corto que la duracion especificada");
-endif
+
+#duracion_segundos = duracion * 60;
+duracion_segundos = t_fin - t_ini;
+
+##n_muestras = fix(duracion_segundos * info.SampleRate);
+muestra_ini = fix(t_ini * info.SampleRate);
+muestra_fin = fix(t_fin * info.SampleRate);
+
+##if info.TotalSamples < n_muestras
+##  error("El archivo es mas corto que la duracion especificada");
+##endif
 
 
-[y, Fs] = audioread(archivo_audio, [1 n_muestras]);
-t = (0:n_muestras-1) / Fs;
+
+#[y, Fs] = audioread(archivo_audio, [1 n_muestras]);
+[y, Fs] = audioread(archivo_audio, [muestra_ini muestra_fin]);
+##t = (0:n_muestras-1) / Fs;
+t = t_ini:1/Fs:t_fin;
 
 %Convierto audio stereo a mono
 #Audio_read nos da dos columnas, una para el sonido q sale por el parlante izquierdo
@@ -89,7 +100,7 @@ indice_10000Hz = round(frecuencia_10000Hz * tam_ventana_m / Fs);
 
 E_hat = zeros(num_ventanas - 1, 1); % Se resta 1 porque se calcula la diferencia entre frames sucesivos
 
-j=(indice_100Hz + 1):indice_10000Hz
+j=(indice_100Hz + 1):indice_10000Hz;
 
 for i = 2:num_ventanas
   E_hat(i-1) = sum(fft_resultados(i,j) - fft_resultados(i-1, j));
@@ -101,7 +112,75 @@ E = max(E_hat, 0);
 f_m = info.SampleRate; %frecuencia de muestreo
 
 figure(3);
-plot(0.01:0.01:t(end),E);
+##plot(0.01:0.01:t(end),E);
+plot((t_ini+0.01):0.01:(t_fin-0.01),E);
+
 xlabel("Tiempo");
 ylabel("Flujo de energía");
 title("Flujo de energía en función del tiempo");
+
+convolucion=conv(y,y);
+vector_conv=1:length(convolucion);
+vector_conv = vector_conv/Fs;
+
+
+figure(4)
+plot(vector_conv,convolucion)
+title("Convolucion")
+
+%----- Calculo de los beats ------
+% Calculo del escalar K
+% Suponiendo que E_R(i) es una referencia conocida o un patrón que se espera encontrar
+M = length(E);  % Horizonte en el cual se minimiza la distancia
+E_R = rand(M, 1); % Ejemplo: generar una referencia aleatoria (reemplazar con la referencia correcta)
+
+numerador = 0;
+denominador = 0;
+
+for i = 1:M
+  numerador += E(i) * E_R(i);
+  denominador += E_R(i) ^ 2;
+endfor
+
+K = numerador / denominador;
+
+% Calculo de la norma L2 minimizada
+L2_norm = 0;
+for i = 1:M
+  L2_norm += (E(i) - K * E_R(i)) ^ 2;
+endfor
+
+
+##
+##% Calculo de la correlacion cruzada
+##N_R = 100; % Numero de valores de R (ejemplo: 100 valores de R entre 60 y 150 BPM)
+##tempos = linspace(60, 150, N_R);
+##N_D = 10; % Numero de tiempos discretizados
+##
+##C = zeros(N_R, N_D);
+##for r = 1:N_R
+##  R = tempos(r);
+##  T_r = 1 / (R / 60); % Periodo en segundos
+##  for t = 1:N_D
+##    j = (t-1) * T_r * Fs + 1;
+##    if j + M - 1 <= length(E_R)
+##      E_R_shifted = E_R(floor(j):floor(j) + M - 1);
+##      C(r, t) = sum(E .* E_R_shifted);
+##    end
+##  end
+##end
+##
+##[max_corr, idx] = max(C(:));
+##[r_idx, t_idx] = ind2sub(size(C), idx);
+##best_R = tempos(r_idx);
+##best_t = (t_idx - 1) * (1 / (best_R / 60));
+##
+##disp(['Mejor tempo (BPM): ', num2str(best_R)]);
+##disp(['Mejor candidato a downbeat (s): ', num2str(best_t)]);
+##
+##figure(4);
+##imagesc(C);
+##xlabel("Tiempos discretizados");
+##ylabel("Tempos (BPM)");
+##title("Correlación cruzada");
+##colorbar;
