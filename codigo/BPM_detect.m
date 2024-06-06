@@ -13,6 +13,7 @@ if seleccion > 0
   disp(["Has seleccionado: ", nombre_archivo]);
 else
   disp("No has seleccionado ninguna canción.");
+  return;
 endif
 
 archivo_audio = strcat("../samples/",nombre_archivo);
