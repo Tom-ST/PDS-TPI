@@ -1,6 +1,6 @@
 clc; clear all;
 ##variables (se pueden cambiar)
-duracion = 0.5; %cantidad de minutos a leer del archivo
+duracion = 0.01; %cantidad de minutos a leer del archivo
 
 ##MUY BUENAS A TODOS
 
@@ -32,6 +32,8 @@ endif
 t = (0:n_muestras-1) / Fs;
 
 %Convierto audio stereo a mono
+#Audio_read nos da dos columnas, una para el sonido q sale por el parlante izquierdo
+#y otra que sale por el parlante derecho, hacemos un promedio
 if size(y ,2) == 2
   y = (y(:,1) + y(:,2)) / 2;
 endif
@@ -40,6 +42,8 @@ endif
 figure();
 plot(t,y);
 xlabel("Tiempo (s)");
+ylabel("Amplitud");
+title("Audio en funcion del tiempo")
 
 %ventana para transformada de fourier de corto tiempo: 10ms (por que 10? se podria calcular este valor?)
 %analizo la transformada de fourier en ventanas de 10 ms para detectar
@@ -51,6 +55,7 @@ xlabel("Tiempo (s)");
 
 tam_ventana = 0.001;% en segundos (10 ms)
 tam_ventana_m = fix(tam_ventana * Fs); %tamaño de la ventana en muestras
+desplazamiento = fix(tam_ventana_m / 2); %desplazamiento de la ventana (50% overlap)
 
 ## Funcion de compresion
 G = @(x) sqrt(x);
@@ -67,18 +72,51 @@ endfor
 fft_resultados = zeros(num_ventanas, tam_ventana_m);
 
 for i = 1:num_ventanas
-  fft_resultados(i, :) = G(abs(fft(fragmentos(i,:))));
+  fft_resultados(i, :) = G(abs(fft(fragmentos(i,:)))); #las filas son 10ms, hace la fft cada 10ms
 endfor
 
+figure
+stem(fft_resultados(100,:))
+title("Transformada de fourier para una cierta fila")
 
 
-##Calculo del flujo de la energia FALTA HACER
-E = zeros(num_ventanas,1);
+% Calculo del flujo de la energia
+E_hat = zeros(num_ventanas - 1, 1); % Se resta 1 porque se calcula la diferencia entre frames sucesivos
+
+for i = 2:num_ventanas
+  E_hat(i-1) = sum(fft_resultados(i, :) - fft_resultados(i-1, :));
+endfor
+
+% Rectificacion media onda
+E = max(E_hat, 0);
+
+f_m = info.SampleRate #frecuencia de muestreo
+
+figure;
+plot(E);
+xlabel("Frames");
+ylabel("Flujo de energía");
+title("Flujo de energía en función del tiempo");
 
 
 
 
-##figure();
-##plot(t,E);
-##title("Flujo de la energia");
+##
+##E_hat = zeros(1, num_ventanas - 1);
+##for i = 2:num_ventanas
+##  E_hat(i-1) = sum(fft_resultados(i, :) - fft_resultados(i-1, :));
+##endfor
+##
+##E = max(E_hat, 0); % toma los valores positivos 2da ecuacion del paper
+##
+##% Graficar el flujo de energía
+##tiempo_ventanas = (1:length(E)) * (desplazamiento / Fs);
+##
+##figure;
+##plot(tiempo_ventanas, E);
+##xlabel("Tiempo en segundos");
+##ylabel("Flujo de Energía E(n)");
+##
+##
+
 
