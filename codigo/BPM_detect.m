@@ -3,6 +3,7 @@ clc; clear all;
 duracion = 0.5; %cantidad de minutos a leer del archivo
 
 #HOLA A TODOS
+#todo tranqui?
 
 ## Codigo
 canciones = cargar_canciones();
