@@ -1,6 +1,6 @@
 clc; clear all;
 ##variables (se pueden cambiar)
-duracion = 0.01; %cantidad de minutos a leer del archivo
+duracion = 0.5; %cantidad de minutos a leer del archivo
 
 
 ## Codigo
@@ -38,7 +38,7 @@ if size(y ,2) == 2
 endif
 
 
-figure();
+figure(1);
 plot(t,y);
 xlabel("Tiempo (s)");
 ylabel("Amplitud");
@@ -52,7 +52,7 @@ title("Audio en funcion del tiempo")
 % de baja frecuencia pero alta amplitud.
 % uso G(x) = x^(1/2), o arcsin(x). no uso log porque no se comporta bien cerca del cero
 
-tam_ventana = 0.001;% en segundos (10 ms)
+tam_ventana = 0.01;% en segundos (10 ms)
 tam_ventana_m = fix(tam_ventana * Fs); %tamaño de la ventana en muestras
 desplazamiento = fix(tam_ventana_m / 2); %desplazamiento de la ventana (50% overlap)
 
@@ -74,12 +74,12 @@ for i = 1:num_ventanas
   fft_resultados(i, :) = G(abs(fft(fragmentos(i,:)))); #las filas son 10ms, hace la fft cada 10ms
 endfor
 
-figure
+figure(2)
 stem(fft_resultados(100,:))
 title("Transformada de fourier para una cierta fila")
 
 
-% Calculo del flujo de la energia
+%----- Calculo del flujo de la energia ------
 % Encontrar los índices correspondientes a 100 Hz y 10000 Hz
 frecuencia_100Hz = 100;
 frecuencia_10000Hz = 10000;
@@ -89,8 +89,10 @@ indice_10000Hz = round(frecuencia_10000Hz * tam_ventana_m / Fs);
 
 E_hat = zeros(num_ventanas - 1, 1); % Se resta 1 porque se calcula la diferencia entre frames sucesivos
 
+j=(indice_100Hz + 1):indice_10000Hz
+
 for i = 2:num_ventanas
-  E_hat(i-1) = sum(fft_resultados(i, indice_100Hz:indice_10000Hz) - fft_resultados(i-1, indice_100Hz:indice_10000Hz));
+  E_hat(i-1) = sum(fft_resultados(i,j) - fft_resultados(i-1, j));
 endfor
 
 % Rectificacion media onda
@@ -98,8 +100,8 @@ E = max(E_hat, 0);
 
 f_m = info.SampleRate; %frecuencia de muestreo
 
-figure;
-plot(E);
-xlabel("Frames");
+figure(3);
+plot(0.01:0.01:t(end),E);
+xlabel("Tiempo");
 ylabel("Flujo de energía");
 title("Flujo de energía en función del tiempo");
