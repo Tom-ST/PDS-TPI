@@ -4,7 +4,7 @@ clc; clear all;
 duracion = 0.1; %cantidad de minutos a leer del archivo
 
 t_ini = 10; #Segundo que se comienza a analizar la cancion
-t_fin = 20; #Termina el analisis
+t_fin = 70; #Termina el analisis
 
 ## Codigo
 canciones = cargar_canciones();
@@ -182,16 +182,48 @@ ylabel("Amplitud");
 title("Picos identificados en la señal de audio");
 
 
-% Calculamos los intervalos de tiempo entre los picos consecutivos
-intervalos_tiempo = diff(picos_significativos) * 0.01; % Convertimos los índices de picos a tiempo y calculamos los intervalos en segundos
 
-% Calculamos el promedio de los intervalos de tiempo
-promedio_intervalo_tiempo = mean(intervalos_tiempo);
 
-% Convertimos el intervalo de tiempo promedio a BPM
-bpm = round(60 / promedio_intervalo_tiempo);
 
-disp(['El tempo de la canción es aproximadamente ', num2str(bpm), ' BPM']);
+
+
+
+%========================== CALCULO SIMPLE DE BPM UTILIZANDO PROMEDIO ==========================
+%========================== DESCOMENTAR PARA PROBAR ============================================
+##% Calculamos los intervalos de tiempo entre los picos consecutivos
+##intervalos_tiempo = diff(picos_significativos) * 0.01; % Convertimos los índices de picos a tiempo y calculamos los intervalos en segundos
+##
+##% Calculamos el promedio de los intervalos de tiempo
+##promedio_intervalo_tiempo = mean(intervalos_tiempo);
+##
+##% Convertimos el intervalo de tiempo promedio a BPM
+##bpm = round(60 / promedio_intervalo_tiempo);
+##
+##disp(['El tempo de la canción es aproximadamente ', num2str(bpm), ' BPM']);
+
+
+
+
+
+% PASOS A REALIZAR (segun chatgpt)
+##1. Definir el tiempo del primer beat, el swing y la probabilidad de ocurrencia de transitorios: Necesitas definir el tiempo del primer beat (b0), el swing (S) y la probabilidad de ocurrencia de los transitorios en función del tiempo. Esta definición se basa en observaciones empíricas o en elecciones ad-hoc iniciales.
+##
+##2. Escribir la función de probabilidad (PDF): Debes establecer una función de densidad de probabilidad que modele la ocurrencia de transitorios en función del tiempo, el tempo y el swing. Esta función debería expresar la probabilidad de que ocurran transitorios en momentos específicos, dados el tempo y el swing.
+##
+##3. Discretizar las variables: Los valores de swing y el tiempo del primer beat deben discretizarse para facilitar la búsqueda. Define conjuntos de valores discretos para el swing y el tiempo del primer beat, y establece los límites y pasos para cada variable.
+##
+##4. Calcular la verosimilitud (likelihood): Calcula la verosimilitud de observar los transitorios en los tiempos dados utilizando la función de probabilidad definida anteriormente. Esto implica calcular la verosimilitud para todas las combinaciones de tempo, swing y tiempo del primer beat en el espacio de búsqueda discreto definido.
+##
+##5. Optimización de la verosimilitud: Utiliza técnicas de optimización para encontrar la combinación óptima de tempo, swing y tiempo del primer beat que maximice la verosimilitud calculada.
+##
+##6. Refinamiento de los parámetros: Refina los valores estimados de tempo, swing y tiempo del primer beat si es necesario, utilizando métodos como la búsqueda en una vecindad de los valores estimados iniciales.
+##
+##7. Optimización del rendimiento: Considera técnicas para acelerar el proceso de búsqueda, como el uso de segmentos de audio más pequeños para la estimación inicial, la precomputación de versiones muestreadas de la verosimilitud y la eliminación de variables de búsqueda redundantes.
+%========================= 1.Definir la funcion de densidad de probabilidad ===================
+%========================= Paso 2: Cálculo de la verosimilitud ===================
+%========================= Paso 3: Optimización de la verosimilitud ===================
+% ============================ Paso 4: Refinamiento y aceleración de la búsqueda ===============================
+
 
 
 
