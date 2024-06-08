@@ -1,9 +1,10 @@
+pkg load signal
 clc; clear all;
 ##variables (se pueden cambiar)
 duracion = 0.1; %cantidad de minutos a leer del archivo
 
 t_ini = 10; #Segundo que se comienza a analizar la cancion
-t_fin = 15; #Termina el analisis
+t_fin = 20; #Termina el analisis
 
 ## Codigo
 canciones = cargar_canciones();
@@ -119,36 +120,120 @@ xlabel("Tiempo");
 ylabel("Flujo de energía");
 title("Flujo de energía en función del tiempo");
 
-convolucion=conv(y,y);
-vector_conv=1:length(convolucion);
-vector_conv = vector_conv/Fs;
 
 
-figure(4)
-plot(vector_conv,convolucion)
-title("Convolucion")
 
-%----- Calculo de los beats ------
-% Calculo del escalar K
-% Suponiendo que E_R(i) es una referencia conocida o un patrón que se espera encontrar
-M = length(E);  % Horizonte en el cual se minimiza la distancia
-E_R = rand(M, 1); % Ejemplo: generar una referencia aleatoria (reemplazar con la referencia correcta)
 
-numerador = 0;
-denominador = 0;
 
-for i = 1:M
-  numerador += E(i) * E_R(i);
-  denominador += E_R(i) ^ 2;
-endfor
 
-K = numerador / denominador;
 
-% Calculo de la norma L2 minimizada
-L2_norm = 0;
-for i = 1:M
-  L2_norm += (E(i) - K * E_R(i)) ^ 2;
-endfor
+
+% =========================== METODO DEL PAPER 2 ===============================
+[peaks, peak_locs] = findpeaks(E);
+
+% Ploteamos los picos en la señal de flujo de energía
+figure(4);
+plot((t_ini+0.01):0.01:(t_fin-0.01),E);
+hold on;
+plot((t_ini+0.01)+peak_locs*0.01, peaks, 'ro'); % Convertimos los índices a tiempo
+hold off;
+
+xlabel("Tiempo");
+ylabel("Flujo de energía");
+title("Picos de flujo de energía en función del tiempo");
+
+
+% Establecer un umbral como un porcentaje del máximo pico encontrado
+umbral = 0.5; % Por ejemplo, seleccionamos picos que estén por encima del 50% del máximo pico
+
+% Calculamos el máximo pico
+max_peak = max(peaks);
+
+% Filtramos los picos significativos que superan el umbral
+picos_significativos = peak_locs(peaks >= umbral * max_peak);
+valores_significativos = peaks(peaks >= umbral * max_peak);
+
+% Ploteamos los picos significativos en la señal de flujo de energía
+figure(5);
+plot((t_ini+0.01):0.01:(t_fin-0.01),E);
+hold on;
+plot((t_ini+0.01)+picos_significativos*0.01, valores_significativos, 'ro'); % Convertimos los índices a tiempo
+hold off;
+
+xlabel("Tiempo");
+ylabel("Flujo de energía");
+title("Picos de flujo de energía significativos en función del tiempo");
+
+% Ploteamos la señal de audio en función del tiempo
+figure(6);
+plot(t, y);
+hold on;
+
+% Ploteamos líneas verticales en las ubicaciones de los picos
+tiempo_picos = (t_ini + 0.01) + picos_significativos * 0.01; % Convertimos los índices de picos a tiempo
+for i = 1:length(tiempo_picos)
+    line([tiempo_picos(i), tiempo_picos(i)], ylim, 'Color', 'r', 'LineStyle', '--'); % Graficamos una línea vertical en la posición del pico
+end
+
+hold off;
+
+xlabel("Tiempo (s)");
+ylabel("Amplitud");
+title("Picos identificados en la señal de audio");
+
+
+% Calculamos los intervalos de tiempo entre los picos consecutivos
+intervalos_tiempo = diff(picos_significativos) * 0.01; % Convertimos los índices de picos a tiempo y calculamos los intervalos en segundos
+
+% Calculamos el promedio de los intervalos de tiempo
+promedio_intervalo_tiempo = mean(intervalos_tiempo);
+
+% Convertimos el intervalo de tiempo promedio a BPM
+bpm = round(60 / promedio_intervalo_tiempo);
+
+disp(['El tempo de la canción es aproximadamente ', num2str(bpm), ' BPM']);
+
+
+
+
+
+
+
+
+
+
+
+
+##%----- Calculo de los beats ------
+##% Calculo del escalar K
+##% Suponiendo que E_R(i) es una referencia conocida o un patrón que se espera encontrar
+##M = length(E);  % Horizonte en el cual se minimiza la distancia
+##E_R = rand(M, 1); % Ejemplo: generar una referencia aleatoria (reemplazar con la referencia correcta)
+##
+##numerador = 0;
+##denominador = 0;
+##
+##for i = 1:M
+##  numerador += E(i) * E_R(i);
+##  denominador += E_R(i) ^ 2;
+##endfor
+##
+##K = numerador / denominador;
+##
+##% Calculo de la norma L2 minimizada
+##L2_norm = 0;
+##for i = 1:M
+##  L2_norm += (E(i) - K * E_R(i)) ^ 2;
+##endfor
+
+
+
+
+
+
+
+
+
 
 
 ##
