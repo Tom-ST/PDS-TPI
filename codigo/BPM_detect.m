@@ -182,28 +182,93 @@ ylabel("Amplitud");
 title("Picos identificados en la señal de audio");
 
 
-
-
-
-
-
-
 %========================== CALCULO SIMPLE DE BPM UTILIZANDO PROMEDIO ==========================
 %========================== DESCOMENTAR PARA PROBAR ============================================
-##% Calculamos los intervalos de tiempo entre los picos consecutivos
-##intervalos_tiempo = diff(picos_significativos) * 0.01; % Convertimos los índices de picos a tiempo y calculamos los intervalos en segundos
-##
-##% Calculamos el promedio de los intervalos de tiempo
-##promedio_intervalo_tiempo = mean(intervalos_tiempo);
-##
-##% Convertimos el intervalo de tiempo promedio a BPM
-##bpm = round(60 / promedio_intervalo_tiempo);
-##
-##disp(['El tempo de la canción es aproximadamente ', num2str(bpm), ' BPM']);
+% Calculamos los intervalos de tiempo entre los picos consecutivos
+intervalos_tiempo = diff(picos_significativos) * 0.01; % Convertimos los índices de picos a tiempo y calculamos los intervalos en segundos
+
+% Calculamos el promedio de los intervalos de tiempo
+promedio_intervalo_tiempo = mean(intervalos_tiempo);
+
+% Convertimos el intervalo de tiempo promedio a BPM
+bpm = round(60 / promedio_intervalo_tiempo);
+
+disp(['El tempo de la canción es aproximadamente ', num2str(bpm), ' BPM']);
 
 
+% Función p_t
+function pt_value = pt(t_i, T, S, b_0)
+  pt_value = exp(-((t_i - T) ^ 2) / (2 * S ^ 2)) / (S * sqrt(2 * pi));
+endfunction
 
+% Función L_t
+function log_likelihood = L_t(T, S, b_0, t_i_values)
+  log_likelihood = sum(log(arrayfun(@(t_i) pt(t_i, T, S, b_0), t_i_values)));
+endfunction
 
+% Discretización de las variables
+T_values = linspace(0, 10, 20);  % Reducción a 20 puntos
+S_values = linspace(0.1, 5, 20); % Reducción a 20 puntos
+b0_values = linspace(0, 1, 20);  % Reducción a 20 puntos
+
+t_i_values = tiempo_picos - t_ini; % Ajustar los valores de t_i para que correspondan a los picos detectados
+
+max_likelihood = -Inf;
+best_T = T_values(1);
+best_S = S_values(1);
+best_b0 = b0_values(1);
+
+total_iterations = length(T_values) * length(S_values) * length(b0_values);
+iteration = 0;
+
+for T = T_values
+  for S = S_values
+    for b0 = b0_values
+      iteration++;
+      likelihood = L_t(T, S, b0, t_i_values);
+      if likelihood > max_likelihood
+        max_likelihood = likelihood;
+        best_T = T;
+        best_S = S;
+        best_b0 = b0;
+      endif
+      if mod(iteration, 100) == 0  % Imprimir progreso cada 100 iteraciones
+        disp(['Iteración ', num2str(iteration), ' de ', num2str(total_iterations)]);
+      endif
+    endfor
+  endfor
+endfor
+
+disp(['Mejor T: ', num2str(best_T)]);
+disp(['Mejor S: ', num2str(best_S)]);
+disp(['Mejor b0: ', num2str(best_b0)]);
+disp(['Max Likelihood: ', num2str(max_likelihood)]);
+
+% Calculo de p_e(e)
+t_values = linspace(-10, 10, 1000); % Asumiendo valores de tiempo para calcular p_t(t)
+T = best_T;
+S = best_S;
+b_0 = best_b0;
+
+% Calculo de p_t(t)
+p_t_values = arrayfun(@(t) pt(t, T, S, b_0), t_values);
+
+% Calculo de p_e(e) usando convolución
+p_e_values = conv(p_t_values, flip(p_t_values), 'same');
+
+% Graficar p_t(t) y p_e(e)
+figure(7);
+subplot(2, 1, 1);
+plot(t_values, p_t_values);
+xlabel('Tiempo');
+ylabel('p_t(t)');
+title('Función de densidad de probabilidad p_t(t)');
+
+subplot(2, 1, 2);
+plot(t_values, p_e_values);
+xlabel('e');
+ylabel('p_e(e)');
+title('Función de densidad de probabilidad p_e(e)');
 
 % PASOS A REALIZAR (segun chatgpt)
 ##1. Definir el tiempo del primer beat, el swing y la probabilidad de ocurrencia de transitorios: Necesitas definir el tiempo del primer beat (b0), el swing (S) y la probabilidad de ocurrencia de los transitorios en función del tiempo. Esta definición se basa en observaciones empíricas o en elecciones ad-hoc iniciales.
