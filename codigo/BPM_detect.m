@@ -1,5 +1,5 @@
 pkg load signal
-clc; clear all;
+clc; clear all; close all;
 ##variables (se pueden cambiar)
 duracion = 0.1; %cantidad de minutos a leer del archivo
 
@@ -50,26 +50,26 @@ if size(y ,2) == 2
 endif
 
 
-figure(1);
-plot(t,y);
-xlabel("Tiempo (s)");
-ylabel("Amplitud");
-title("Audio en funcion del tiempo")
+##figure(1);
+##plot(t,y);
+##xlabel("Tiempo (s)");
+##ylabel("Amplitud");
+##title("Audio en funcion del tiempo")
 
 %ventana para transformada de fourier de corto tiempo: 10ms (por que 10? se podria calcular este valor?)
 %analizo la transformada de fourier en ventanas de 10 ms para detectar
 % cambios en las frecuencias, solo utilizo la magnitud de la fft
-% utilizo una funcion de compresion G(x) para que aquellos componentes de
+% utilizo una funcion de compresion C(x) para que aquellos componentes de
 % frecuencia alta (como platillos) no sean "masked(?)" por componentes
 % de baja frecuencia pero alta amplitud.
-% uso G(x) = x^(1/2), o arcsin(x). no uso log porque no se comporta bien cerca del cero
+% uso C(x) = x^(1/2), o arcsin(x). no uso log porque no se comporta bien cerca del cero
 
 tam_ventana = 0.01;% en segundos (10 ms)
 tam_ventana_m = fix(tam_ventana * Fs); %tamaño de la ventana en muestras
 desplazamiento = fix(tam_ventana_m / 2); %desplazamiento de la ventana (50% overlap)
 
 ## Funcion de compresion
-G = @(x) sqrt(x);
+C = @(x) sqrt(x);
 
 num_ventanas = fix(length(y) / tam_ventana_m);
 
@@ -83,12 +83,12 @@ endfor
 fft_resultados = zeros(num_ventanas, tam_ventana_m);
 
 for i = 1:num_ventanas
-  fft_resultados(i, :) = G(abs(fft(fragmentos(i,:)))); #las filas son 10ms, hace la fft cada 10ms
+  fft_resultados(i, :) = C(abs(fft(fragmentos(i,:)))); #las filas son 10ms, hace la fft cada 10ms
 endfor
 
-figure(2)
-stem(fft_resultados(100,:))
-title("Transformada de fourier para una cierta fila")
+##figure(2)
+##stem(fft_resultados(100,:))
+##title("Transformada de fourier para una cierta fila")
 
 
 %----- Calculo del flujo de la energia ------
@@ -112,13 +112,13 @@ E = max(E_hat, 0);
 
 f_m = info.SampleRate; %frecuencia de muestreo
 
-figure(3);
-##plot(0.01:0.01:t(end),E);
-plot((t_ini+0.01):0.01:(t_fin-0.01),E);
-
-xlabel("Tiempo");
-ylabel("Flujo de energía");
-title("Flujo de energía en función del tiempo");
+##figure(3);
+####plot(0.01:0.01:t(end),E);
+##plot((t_ini+0.01):0.01:(t_fin-0.01),E);
+##
+##xlabel("Tiempo");
+##ylabel("Flujo de energía");
+##title("Flujo de energía en función del tiempo");
 
 
 
@@ -132,15 +132,14 @@ title("Flujo de energía en función del tiempo");
 [peaks, peak_locs] = findpeaks(E);
 
 % Ploteamos los picos en la señal de flujo de energía
-figure(4);
-plot((t_ini+0.01):0.01:(t_fin-0.01),E);
-hold on;
-plot((t_ini+0.01)+peak_locs*0.01, peaks, 'ro'); % Convertimos los índices a tiempo
-hold off;
-
-xlabel("Tiempo");
-ylabel("Flujo de energía");
-title("Picos de flujo de energía en función del tiempo");
+##figure(4);
+##plot((t_ini+0.01):0.01:(t_fin-0.01),E);
+##hold on;
+##plot((t_ini+0.01)+peak_locs*0.01, peaks, 'ro'); % Convertimos los índices a tiempo
+##hold off;
+##xlabel("Tiempo");
+##ylabel("Flujo de energía");
+##title("Picos de flujo de energía en función del tiempo");
 
 
 % Establecer un umbral como un porcentaje del máximo pico encontrado
@@ -154,215 +153,189 @@ picos_significativos = peak_locs(peaks >= umbral * max_peak);
 valores_significativos = peaks(peaks >= umbral * max_peak);
 
 % Ploteamos los picos significativos en la señal de flujo de energía
-figure(5);
-plot((t_ini+0.01):0.01:(t_fin-0.01),E);
-hold on;
-plot((t_ini+0.01)+picos_significativos*0.01, valores_significativos, 'ro'); % Convertimos los índices a tiempo
-hold off;
+##figure(5);
+##plot((t_ini+0.01):0.01:(t_fin-0.01),E);
+##hold on;
+##plot((t_ini+0.01)+picos_significativos*0.01, valores_significativos, 'ro'); % Convertimos los índices a tiempo
+##hold off;
 
-xlabel("Tiempo");
-ylabel("Flujo de energía");
-title("Picos de flujo de energía significativos en función del tiempo");
+##xlabel("Tiempo");
+##ylabel("Flujo de energía");
+##title("Picos de flujo de energía significativos en función del tiempo");
 
 % Ploteamos la señal de audio en función del tiempo
-figure(6);
-plot(t, y);
-hold on;
-
-% Ploteamos líneas verticales en las ubicaciones de los picos
-tiempo_picos = (t_ini + 0.01) + picos_significativos * 0.01; % Convertimos los índices de picos a tiempo
-for i = 1:length(tiempo_picos)
-    line([tiempo_picos(i), tiempo_picos(i)], ylim, 'Color', 'r', 'LineStyle', '--'); % Graficamos una línea vertical en la posición del pico
-end
-
-hold off;
-
-xlabel("Tiempo (s)");
-ylabel("Amplitud");
-title("Picos identificados en la señal de audio");
-
-
-%========================== CALCULO SIMPLE DE BPM UTILIZANDO PROMEDIO ==========================
-%========================== DESCOMENTAR PARA PROBAR ============================================
-% Calculamos los intervalos de tiempo entre los picos consecutivos
-intervalos_tiempo = diff(picos_significativos) * 0.01; % Convertimos los índices de picos a tiempo y calculamos los intervalos en segundos
-
-% Calculamos el promedio de los intervalos de tiempo
-promedio_intervalo_tiempo = mean(intervalos_tiempo);
-
-% Convertimos el intervalo de tiempo promedio a BPM
-bpm = round(60 / promedio_intervalo_tiempo);
-
-disp(['El tempo de la canción es aproximadamente ', num2str(bpm), ' BPM']);
-
-
-% Función p_t
-function pt_value = pt(t_i, T, S, b_0)
-  pt_value = exp(-((t_i - T) ^ 2) / (2 * S ^ 2)) / (S * sqrt(2 * pi));
-endfunction
-
-% Función L_t
-function log_likelihood = L_t(T, S, b_0, t_i_values)
-  log_likelihood = sum(log(arrayfun(@(t_i) pt(t_i, T, S, b_0), t_i_values)));
-endfunction
-
-% Discretización de las variables
-T_values = linspace(0, 10, 20);  % Reducción a 20 puntos
-S_values = linspace(0.1, 5, 20); % Reducción a 20 puntos
-b0_values = linspace(0, 1, 20);  % Reducción a 20 puntos
-
-t_i_values = tiempo_picos - t_ini; % Ajustar los valores de t_i para que correspondan a los picos detectados
-
-max_likelihood = -Inf;
-best_T = T_values(1);
-best_S = S_values(1);
-best_b0 = b0_values(1);
-
-total_iterations = length(T_values) * length(S_values) * length(b0_values);
-iteration = 0;
-
-for T = T_values
-  for S = S_values
-    for b0 = b0_values
-      iteration++;
-      likelihood = L_t(T, S, b0, t_i_values);
-      if likelihood > max_likelihood
-        max_likelihood = likelihood;
-        best_T = T;
-        best_S = S;
-        best_b0 = b0;
-      endif
-      if mod(iteration, 100) == 0  % Imprimir progreso cada 100 iteraciones
-        disp(['Iteración ', num2str(iteration), ' de ', num2str(total_iterations)]);
-      endif
-    endfor
-  endfor
-endfor
-
-disp(['Mejor T: ', num2str(best_T)]);
-disp(['Mejor S: ', num2str(best_S)]);
-disp(['Mejor b0: ', num2str(best_b0)]);
-disp(['Max Likelihood: ', num2str(max_likelihood)]);
-
-% Calculo de p_e(e)
-t_values = linspace(-10, 10, 1000); % Asumiendo valores de tiempo para calcular p_t(t)
-T = best_T;
-S = best_S;
-b_0 = best_b0;
-
-% Calculo de p_t(t)
-p_t_values = arrayfun(@(t) pt(t, T, S, b_0), t_values);
-
-% Calculo de p_e(e) usando convolución
-p_e_values = conv(p_t_values, flip(p_t_values), 'same');
-
-% Graficar p_t(t) y p_e(e)
-figure(7);
-subplot(2, 1, 1);
-plot(t_values, p_t_values);
-xlabel('Tiempo');
-ylabel('p_t(t)');
-title('Función de densidad de probabilidad p_t(t)');
-
-subplot(2, 1, 2);
-plot(t_values, p_e_values);
-xlabel('e');
-ylabel('p_e(e)');
-title('Función de densidad de probabilidad p_e(e)');
-
-% PASOS A REALIZAR (segun chatgpt)
-##1. Definir el tiempo del primer beat, el swing y la probabilidad de ocurrencia de transitorios: Necesitas definir el tiempo del primer beat (b0), el swing (S) y la probabilidad de ocurrencia de los transitorios en función del tiempo. Esta definición se basa en observaciones empíricas o en elecciones ad-hoc iniciales.
+##figure(6);
+##plot(t, y);
+##hold on;
 ##
-##2. Escribir la función de probabilidad (PDF): Debes establecer una función de densidad de probabilidad que modele la ocurrencia de transitorios en función del tiempo, el tempo y el swing. Esta función debería expresar la probabilidad de que ocurran transitorios en momentos específicos, dados el tempo y el swing.
-##
-##3. Discretizar las variables: Los valores de swing y el tiempo del primer beat deben discretizarse para facilitar la búsqueda. Define conjuntos de valores discretos para el swing y el tiempo del primer beat, y establece los límites y pasos para cada variable.
-##
-##4. Calcular la verosimilitud (likelihood): Calcula la verosimilitud de observar los transitorios en los tiempos dados utilizando la función de probabilidad definida anteriormente. Esto implica calcular la verosimilitud para todas las combinaciones de tempo, swing y tiempo del primer beat en el espacio de búsqueda discreto definido.
-##
-##5. Optimización de la verosimilitud: Utiliza técnicas de optimización para encontrar la combinación óptima de tempo, swing y tiempo del primer beat que maximice la verosimilitud calculada.
-##
-##6. Refinamiento de los parámetros: Refina los valores estimados de tempo, swing y tiempo del primer beat si es necesario, utilizando métodos como la búsqueda en una vecindad de los valores estimados iniciales.
-##
-##7. Optimización del rendimiento: Considera técnicas para acelerar el proceso de búsqueda, como el uso de segmentos de audio más pequeños para la estimación inicial, la precomputación de versiones muestreadas de la verosimilitud y la eliminación de variables de búsqueda redundantes.
-%========================= 1.Definir la funcion de densidad de probabilidad ===================
-%========================= Paso 2: Cálculo de la verosimilitud ===================
-%========================= Paso 3: Optimización de la verosimilitud ===================
-% ============================ Paso 4: Refinamiento y aceleración de la búsqueda ===============================
-
-
-
-
-
-
-
-
-
-
-
-
-
-##%----- Calculo de los beats ------
-##% Calculo del escalar K
-##% Suponiendo que E_R(i) es una referencia conocida o un patrón que se espera encontrar
-##M = length(E);  % Horizonte en el cual se minimiza la distancia
-##E_R = rand(M, 1); % Ejemplo: generar una referencia aleatoria (reemplazar con la referencia correcta)
-##
-##numerador = 0;
-##denominador = 0;
-##
-##for i = 1:M
-##  numerador += E(i) * E_R(i);
-##  denominador += E_R(i) ^ 2;
-##endfor
-##
-##K = numerador / denominador;
-##
-##% Calculo de la norma L2 minimizada
-##L2_norm = 0;
-##for i = 1:M
-##  L2_norm += (E(i) - K * E_R(i)) ^ 2;
-##endfor
-
-
-
-
-
-
-
-
-
-
-
-##
-##% Calculo de la correlacion cruzada
-##N_R = 100; % Numero de valores de R (ejemplo: 100 valores de R entre 60 y 150 BPM)
-##tempos = linspace(60, 150, N_R);
-##N_D = 10; % Numero de tiempos discretizados
-##
-##C = zeros(N_R, N_D);
-##for r = 1:N_R
-##  R = tempos(r);
-##  T_r = 1 / (R / 60); % Periodo en segundos
-##  for t = 1:N_D
-##    j = (t-1) * T_r * Fs + 1;
-##    if j + M - 1 <= length(E_R)
-##      E_R_shifted = E_R(floor(j):floor(j) + M - 1);
-##      C(r, t) = sum(E .* E_R_shifted);
-##    end
-##  end
+##% Ploteamos líneas verticales en las ubicaciones de los picos
+##tiempo_picos = (t_ini + 0.01) + picos_significativos * 0.01; % Convertimos los índices de picos a tiempo
+##for i = 1:length(tiempo_picos)
+##    line([tiempo_picos(i), tiempo_picos(i)], ylim, 'Color', 'r', 'LineStyle', '--'); % Graficamos una línea vertical en la posición del pico
 ##end
 ##
-##[max_corr, idx] = max(C(:));
-##[r_idx, t_idx] = ind2sub(size(C), idx);
-##best_R = tempos(r_idx);
-##best_t = (t_idx - 1) * (1 / (best_R / 60));
+##hold off;
 ##
-##disp(['Mejor tempo (BPM): ', num2str(best_R)]);
-##disp(['Mejor candidato a downbeat (s): ', num2str(best_t)]);
+##xlabel("Tiempo (s)");
+##ylabel("Amplitud");
+##title("Picos identificados en la señal de audio");
+
+
+
+%funcion de probabilidad
+min_bpm = 70;
+max_bpm = 140;
+bpms = [70:140];
+
+
+%Pruebo manualmente
+tiempo_seleccionado = t_fin-t_ini;
+bpm_selec = 70;
+
+b0 = 1;
+
+duracion_beat = 60 / bpm_selec;
+    posiciones = [];
+    tiempo_actual = b0;
+
+while tiempo_actual <= tiempo_seleccionado
+  posiciones = [posiciones, tiempo_actual];
+  tiempo_actual += duracion_beat;
+end
+
+
+
+%distribucion normal
+##mu = 0;
+##sig = 1 / sqrt(2 * pi);
 ##
-##figure(4);
-##imagesc(C);
-##xlabel("Tiempos discretizados");
-##ylabel("Tempos (BPM)");
-##title("Correlación cruzada");
-##colorbar;
+##G = @(x) (1 / (sig * sqrt(2 * pi))) * exp(-0.5 * ((x - mu) / sig).^2);
+##
+##t=linspace(-10,10,1000);
+##plot(t,G(t))
+
+
+##% Calcular la función de verosimilitud para diferentes BPM
+##max_bpm = 140;
+##min_bpm = 70;
+##bps = (min_bpm:max_bpm) / 60;
+##L = zeros(length(bps), 1);
+##
+##for k = 1:length(bps)
+##  bpm = bps(k);
+##  interval = Fs / bpm; % Intervalo en muestras
+##  score = 0;
+##  for i = 1:length(picos_significativos)
+##    % Para cada pico, calcular la distancia a los múltiplos del intervalo
+##    distancias = abs(mod(picos_significativos(i) - picos_significativos(1), interval));
+##    % Considerar también la distancia al múltiplo siguiente para evitar errores de fase
+##    distancias = min(distancias, interval - distancias);
+##    % Sumar las probabilidades
+##    prob = exp(-distancias / (Fs / 4));
+##    score = score + sum(prob);
+##  endfor
+##  L(k) = score;
+##endfor
+##
+##[~, idx_max] = max(L);
+##BPM_estimado = bps(idx_max) * 60;
+##
+##figure(7);
+##plot((min_bpm:max_bpm), L);
+##xlabel('BPM');
+##ylabel('Likelihood');
+##title('Likelihood de diferentes BPM');
+##
+##disp(["El BPM estimado es: ", num2str(BPM_estimado)]);
+
+
+##
+##%========================== CALCULO SIMPLE DE BPM UTILIZANDO PROMEDIO ==========================
+##%========================== DESCOMENTAR PARA PROBAR ============================================
+##% Calculamos los intervalos de tiempo entre los picos consecutivos
+##intervalos_tiempo = diff(picos_significativos) * 0.01; % Convertimos los índices de picos a tiempo y calculamos los intervalos en segundos
+##
+##% Calculamos el promedio de los intervalos de tiempo
+##promedio_intervalo_tiempo = mean(intervalos_tiempo);
+##
+##% Convertimos el intervalo de tiempo promedio a BPM
+##bpm = round(60 / promedio_intervalo_tiempo);
+##
+##disp(['El tempo de la canción es aproximadamente ', num2str(bpm), ' BPM']);
+##
+##
+##% Función p_t
+##function pt_value = pt(t_i, T, S, b_0)
+##  pt_value = exp(-((t_i - T) ^ 2) / (2 * S ^ 2)) / (S * sqrt(2 * pi));
+##endfunction
+##
+##% Función L_t
+##function log_likelihood = L_t(T, S, b_0, t_i_values)
+##  log_likelihood = sum(log(arrayfun(@(t_i) pt(t_i, T, S, b_0), t_i_values)));
+##endfunction
+##
+##% Discretización de las variables
+##T_values = [70:140];  % Reducción a 20 puntos
+##S_values = linspace(0.1, 5, 20); % Reducción a 20 puntos
+##b0_values = linspace(0, 1, 20);  % Reducción a 20 puntos
+##
+##t_i_values = tiempo_picos - t_ini; % Ajustar los valores de t_i para que correspondan a los picos detectados
+##
+##max_likelihood = -Inf;
+##best_T = T_values(1);
+##best_S = S_values(1);
+##best_b0 = b0_values(1);
+##
+##total_iterations = length(T_values) * length(S_values) * length(b0_values);
+##iteration = 0;
+##
+##for T = T_values
+##  for S = S_values
+##    for b0 = b0_values
+##      iteration++;
+##      likelihood = L_t(T, S, b0, t_i_values);
+##      if likelihood > max_likelihood
+##        max_likelihood = likelihood;
+##        best_T = T;
+##        best_S = S;
+##        best_b0 = b0;
+##      endif
+##      if mod(iteration, 100) == 0  % Imprimir progreso cada 100 iteraciones
+##        disp(['Iteración ', num2str(iteration), ' de ', num2str(total_iterations)]);
+##      endif
+##    endfor
+##  endfor
+##endfor
+##
+##disp(['Mejor T: ', num2str(best_T)]);
+##disp(['Mejor S: ', num2str(best_S)]);
+##disp(['Mejor b0: ', num2str(best_b0)]);
+##disp(['Max Likelihood: ', num2str(max_likelihood)]);
+
+##% Calculo de p_e(e)
+##t_values = linspace(-10, 10, 1000); % Asumiendo valores de tiempo para calcular p_t(t)
+##T = best_T;
+##S = best_S;
+##b_0 = best_b0;
+##
+##% Calculo de p_t(t)
+##p_t_values = arrayfun(@(t) pt(t, T, S, b_0), t_values);
+##
+##% Calculo de p_e(e) usando convolución
+##p_e_values = conv(p_t_values, flip(p_t_values), 'same');
+##
+##% Graficar p_t(t) y p_e(e)
+##figure(7);
+##subplot(2, 1, 1);
+##plot(t_values, p_t_values);
+##xlabel('Tiempo');
+##ylabel('p_t(t)');
+##title('Función de densidad de probabilidad p_t(t)');
+##
+##subplot(2, 1, 2);
+##plot(t_values, p_e_values);
+##xlabel('e');
+##ylabel('p_e(e)');
+##title('Función de densidad de probabilidad p_e(e)');
+
+
