@@ -169,7 +169,7 @@ valores_significativos = peaks(peaks >= umbral * max_peak);
 ##hold on;
 ##
 ##% Ploteamos líneas verticales en las ubicaciones de los picos
-##tiempo_picos = (t_ini + 0.01) + picos_significativos * 0.01; % Convertimos los índices de picos a tiempo
+tiempo_picos = (t_ini + 0.01) + picos_significativos * 0.01; % Convertimos los índices de picos a tiempo
 ##for i = 1:length(tiempo_picos)
 ##    line([tiempo_picos(i), tiempo_picos(i)], ylim, 'Color', 'r', 'LineStyle', '--'); % Graficamos una línea vertical en la posición del pico
 ##end
@@ -182,37 +182,55 @@ valores_significativos = peaks(peaks >= umbral * max_peak);
 
 
 
-%funcion de probabilidad
-min_bpm = 70;
-max_bpm = 140;
-bpms = [70:140];
+%============================ Funcion de probabilidad ==================
+% La idea es probar en la funcion L_t distintas combinaciones de T, S ,y b1 hasta que se obtenga
+% la mayor likelihood
+
+% ---Avances--
+% La funcion p_t ya esta terminada, te da la distribucion de probabilidad de la ubicacion de los beats
+% la ubicacion de los beats 1 a 4 ya estan calculados
+
+% Tempos, Swings y beats1 son distintos valores que se van a tener que probar para maximizar la likelihood
+% por ahora conviene probar con un solo valor de esos
+% no cambiar los rangos que esos estan asi por el paper
+
+% ---Falta hacer--
+% 1.
+% como solo le paso la ubicacion de los primeros 4 beats, se puede calcular solo para estos
+% falta "copiar y pegar" esas cuatro campanas de gauss a lo largo de todo el tiempo
+% el siguiente tiempo del b1 seria b4+periodo_beat
+
+% 2.
+% Una vez que eso este listo, hay que terminar la funcion L_t
+% que recibe (T, S, b1, t_picos) y da un valor numerico
+
+Tempos = [70:140];
+Swings = [0:0.1:0.4];%El swing (S) es un porcentaje que determina que tanto se atrasa el segundo y cuarto cuarto-beat (es una propiedad de algunos generos musicales como rock y jazz)
 
 
-%Pruebo manualmente
 tiempo_seleccionado = t_fin-t_ini;
-bpm_selec = 70;
+T = Tempos(1);
+S = Swings(1);
+periodo_beat = 60 / T;
+beats1 = linspace(0, periodo_beat, 32)+t_ini;
+b1 = beats1(32);
+b2 = b1+periodo_beat;
+b3 = b2+periodo_beat;
+b4 = b3+periodo_beat;
 
-b0 = 1;
+b1_4 = [b1 b2+periodo_beat*S b3 b4+periodo_beat*S];
 
-duracion_beat = 60 / bpm_selec;
-    posiciones = [];
-    tiempo_actual = b0;
-
-while tiempo_actual <= tiempo_seleccionado
-  posiciones = [posiciones, tiempo_actual];
-  tiempo_actual += duracion_beat;
-end
+t=linspace(t_ini, t_fin,1000);
+pt = p_t (t, T, b1_4);
+plot(t,pt)
+title("Posicion probable donde se encuentran los 4 cuarto-beats");
 
 
 
-%distribucion normal
-##mu = 0;
-##sig = 1 / sqrt(2 * pi);
-##
-##G = @(x) (1 / (sig * sqrt(2 * pi))) * exp(-0.5 * ((x - mu) / sig).^2);
-##
-##t=linspace(-10,10,1000);
-##plot(t,G(t))
+
+%====================== Fin
+
+
 
 
 ##% Calcular la función de verosimilitud para diferentes BPM
@@ -291,14 +309,14 @@ end
 ##
 ##for T = T_values
 ##  for S = S_values
-##    for b0 = b0_values
+##    for b1 = b0_values
 ##      iteration++;
-##      likelihood = L_t(T, S, b0, t_i_values);
+##      likelihood = L_t(T, S, b1, t_i_values);
 ##      if likelihood > max_likelihood
 ##        max_likelihood = likelihood;
 ##        best_T = T;
 ##        best_S = S;
-##        best_b0 = b0;
+##        best_b0 = b1;
 ##      endif
 ##      if mod(iteration, 100) == 0  % Imprimir progreso cada 100 iteraciones
 ##        disp(['Iteración ', num2str(iteration), ' de ', num2str(total_iterations)]);
@@ -309,7 +327,7 @@ end
 ##
 ##disp(['Mejor T: ', num2str(best_T)]);
 ##disp(['Mejor S: ', num2str(best_S)]);
-##disp(['Mejor b0: ', num2str(best_b0)]);
+##disp(['Mejor b1: ', num2str(best_b0)]);
 ##disp(['Max Likelihood: ', num2str(max_likelihood)]);
 
 ##% Calculo de p_e(e)
