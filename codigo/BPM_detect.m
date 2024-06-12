@@ -200,7 +200,8 @@ tiempo_picos = (t_ini + 0.01) + picos_significativos * 0.01; % Convertimos los Ã
 % no deberia bajar asi derecho, sino tomar el valor que corresponde en la campana de gauss. Corregir
 
 % 2.
-% Hay que terminar la funcion L_t que recibe (T, S, b1, t_picos) y da un valor numerico
+% Hay que terminar la funcion L_t que recibe (T, S, b1, t_picos) y da un valor numerico, no se por que me da -inf
+% una vez que de un numero, hay que probar todas las combinaciones posibles de T, b1 y S y el mayor L_t es el correcto
 
 Tempos = [70:140];
 Swings = [0:0.1:0.4];%El swing (S) es un porcentaje que determina que tanto se atrasa el segundo y cuarto cuarto-beat (es una propiedad de algunos generos musicales como rock y jazz)
@@ -244,7 +245,7 @@ plot(t,pt)
 title("Posicion probable donde se encuentran los cuarto-beats");
 xlabel("Tiempo");
 
-
+retval = L_t (T, S, b1, tiempo_picos)
 
 
 %====================== Fin

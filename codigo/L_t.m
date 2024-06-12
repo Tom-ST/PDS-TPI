@@ -12,4 +12,5 @@ function retval = L_t (T, S, b1, t_picos)
     sum += log(p_t(t_picos(i), T, b1_4));
   endfor
   retval = sum;
+
 endfunction
