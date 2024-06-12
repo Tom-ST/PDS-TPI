@@ -201,6 +201,8 @@ tiempo_picos = (t_ini + 0.01) + picos_significativos * 0.01; % Convertimos los Ã
 
 % 2.
 % Hay que terminar la funcion L_t que recibe (T, S, b1, t_picos) y da un valor numerico, no se por que me da -inf
+%CAMBIANDO P_T AGREGANDO UN EPSILON PARA QUE NO EVALUE EN 0 SE SOLUCIONA EL ERROR
+
 % una vez que de un numero, hay que probar todas las combinaciones posibles de T, b1 y S y el mayor L_t es el correcto
 
 Tempos = [70:140];
@@ -239,6 +241,20 @@ end
 
 ##t=linspace(t_ini, t_fin,10000);
 pt = p_t (t, T, b1_n);
+
+#metromono 80beat
+#Con epsilon
+#T = 70
+#S = 0
+#b1 = 10
+#retval = -1860.6
+
+#Sin epsilon
+#T = 70
+#S = 0
+#b1 = 10
+#retval = inf
+
 figure();
 hold on
 plot(t,pt)
