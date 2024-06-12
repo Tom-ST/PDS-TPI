@@ -4,7 +4,7 @@ clc; clear all; close all;
 duracion = 0.1; %cantidad de minutos a leer del archivo
 
 t_ini = 50; #Segundo que se comienza a analizar la cancion
-t_fin = 65; #Termina el analisis
+t_fin = 90; #Termina el analisis
 
 ## Codigo
 canciones = cargar_canciones();
@@ -257,7 +257,7 @@ xlabel("Tiempo");
 ##S_values = linspace(0.5, 2, 10); % Reducir el rango y aumentar los pasos de S
 ##b0_values = linspace(0, 0.5, 10); % Reducir el rango y aumentar los pasos de b0s
 
-T_values = 70:1:120;
+T_values = 90:1:105;
 S_values = 0;
 b1_values=beats1;
 
