@@ -153,15 +153,15 @@ picos_significativos = peak_locs(peaks >= umbral * max_peak);
 valores_significativos = peaks(peaks >= umbral * max_peak);
 
 % Ploteamos los picos significativos en la señal de flujo de energía
-##figure(5);
-##plot((t_ini+0.01):0.01:(t_fin-0.01),E);
-##hold on;
-##plot((t_ini+0.01)+picos_significativos*0.01, valores_significativos, 'ro'); % Convertimos los índices a tiempo
-##hold off;
+figure(5);
+plot((t_ini+0.01):0.01:(t_fin-0.01),E);
+hold on;
+plot((t_ini+0.01)+picos_significativos*0.01, valores_significativos, 'ro'); % Convertimos los índices a tiempo
+hold off;
 
-##xlabel("Tiempo");
-##ylabel("Flujo de energía");
-##title("Picos de flujo de energía significativos en función del tiempo");
+xlabel("Tiempo");
+ylabel("Flujo de energía");
+title("Picos de flujo de energía significativos en función del tiempo");
 
 % Ploteamos la señal de audio en función del tiempo
 ##figure(6);
@@ -196,13 +196,11 @@ tiempo_picos = (t_ini + 0.01) + picos_significativos * 0.01; % Convertimos los �
 
 % ---Falta hacer--
 % 1.
-% como solo le paso la ubicacion de los primeros 4 beats, se puede calcular solo para estos
-% falta "copiar y pegar" esas cuatro campanas de gauss a lo largo de todo el tiempo
-% el siguiente tiempo del b1 seria b4+periodo_beat
+% en pt(end) el valor es 0 (hacer zoom en el grafico de las posiciones probables de los beats
+% no deberia bajar asi derecho, sino tomar el valor que corresponde en la campana de gauss. Corregir
 
 % 2.
-% Una vez que eso este listo, hay que terminar la funcion L_t
-% que recibe (T, S, b1, t_picos) y da un valor numerico
+% Hay que terminar la funcion L_t que recibe (T, S, b1, t_picos) y da un valor numerico
 
 Tempos = [70:140];
 Swings = [0:0.1:0.4];%El swing (S) es un porcentaje que determina que tanto se atrasa el segundo y cuarto cuarto-beat (es una propiedad de algunos generos musicales como rock y jazz)
@@ -213,17 +211,38 @@ T = Tempos(1);
 S = Swings(1);
 periodo_beat = 60 / T;
 beats1 = linspace(0, periodo_beat, 32)+t_ini;
-b1 = beats1(32);
+b1 = beats1(1);
 b2 = b1+periodo_beat;
 b3 = b2+periodo_beat;
 b4 = b3+periodo_beat;
 
 b1_4 = [b1 b2+periodo_beat*S b3 b4+periodo_beat*S];
 
-t=linspace(t_ini, t_fin,1000);
-pt = p_t (t, T, b1_4);
+b1_n = b1;  % Inicializamos el primer beat
+beat = b1 + periodo_beat;  % Inicializamos el siguiente beat
+
+% Generamos los beats adicionales hasta alcanzar o superar el tiempo t_fin
+while beat <= t_fin
+    b1_n = [b1_n, beat];
+    beat = beat + periodo_beat;  % Calculamos el siguiente beat
+end
+
+% Ajustamos los beats en las segundas y cuartas posiciones
+for i = 2:2:length(b1_n)
+    b1_n(i) = b1_n(i) + periodo_beat * S;
+end
+
+for i = 4:4:length(b1_n)
+    b1_n(i) = b1_n(i) + periodo_beat * S;
+end
+
+##t=linspace(t_ini, t_fin,10000);
+pt = p_t (t, T, b1_n);
+figure();
+hold on
 plot(t,pt)
-title("Posicion probable donde se encuentran los 4 cuarto-beats");
+title("Posicion probable donde se encuentran los cuarto-beats");
+xlabel("Tiempo");
 
 
 
