@@ -263,6 +263,48 @@ xlabel("Tiempo");
 
 retval = L_t (T, S, b1, tiempo_picos)
 
+%-------MAYOR LIKELIHOOD-----------------
+
+% Discretización de las variables
+T_values = Tempos(1):10:Tempos(end); % Reducir el rango y aumentar los pasos de T
+S_values = linspace(0.5, 2, 10); % Reducir el rango y aumentar los pasos de S
+b0_values = linspace(0, 0.5, 10); % Reducir el rango y aumentar los pasos de b0s
+
+t_i_values = tiempo_picos - t_ini; % Ajustar los valores de t_i para que correspondan a los picos detectados
+
+max_likelihood = -Inf;
+best_T = T_values(1);
+best_S = S_values(1);
+best_b0 = b0_values(1);
+
+total_iterations = length(T_values) * length(S_values) * length(b0_values);
+iteration = 0;
+likelihood_values = [];
+for T = T_values
+    for S = S_values
+        for b1 = b0_values
+            iteration++;
+            likelihood = L_t(T, S, b1, t_i_values);
+             likelihood_values = [likelihood_values, likelihood]; % Almacenar el valor de likelihood
+            if likelihood > max_likelihood
+                max_likelihood = likelihood;
+                best_T = T;
+                best_S = S;
+                best_b0 = b1;
+            endif
+            if mod(iteration, 10) == 0
+                disp(['Iteración ', num2str(iteration), ' de ', num2str(total_iterations)]);
+            endif
+        endfor
+    endfor
+endfor
+
+disp(['Mejor T: ', num2str(best_T)]);
+disp(['Mejor S: ', num2str(best_S)]);
+disp(['Mejor b1: ', num2str(best_b0)]);
+disp(['Max Likelihood: ', num2str(max_likelihood)]);
+
+
 
 %====================== Fin
 
