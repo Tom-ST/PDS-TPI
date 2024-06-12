@@ -261,7 +261,7 @@ plot(t,pt)
 title("Posicion probable donde se encuentran los cuarto-beats");
 xlabel("Tiempo");
 
-retval = L_t (T, S, b1, tiempo_picos)
+
 
 %-------MAYOR LIKELIHOOD-----------------
 
@@ -287,8 +287,12 @@ for i = 1:length(T_values)
     for j= 1:length(S_values)
 
       for k =1:length( b1_values)
+
+        % Añadir debug prints
+##            disp(['Iteración ', num2str(iteration), ': T = ', num2str(T_values(i)), ', S = ', num2str(S_values(j)), ', b1 = ', num2str(b1_values(k)), ', likelihood = ', num2str(likelihood)])
+
             iteration++;
-            likelihood = L_t(T_values(i), S_values(j), b1_values(k), tiempo_picos);
+            likelihood = L_t(T_values(i), S_values(j), b1_values(k), tiempo_picos,t_ini,t_fin);
              likelihood_values = [likelihood_values, likelihood]; % Almacenar el valor de likelihood
             if likelihood > max_likelihood
                 max_likelihood = likelihood;

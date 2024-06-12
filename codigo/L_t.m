@@ -1,4 +1,4 @@
-function retval = L_t (T, S, b1, t_picos)
+function retval = L_t (T, S, b1, t_picos,t_ini,t_fin)
   periodo_beat = 60 / T;
 
   b2 = b1+periodo_beat;
