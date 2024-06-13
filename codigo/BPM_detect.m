@@ -210,11 +210,12 @@ Swings = [0:0.1:0.4]; %El swing (S) es un porcentaje que determina que tanto se 
 
 
 tiempo_seleccionado = t_fin-t_ini;
-T = Tempos(1);
+T = 100;
 S = Swings(1);
 periodo_beat = 60 / T;
 beats1 = linspace(0, periodo_beat, 32)+t_ini;
 b1 = beats1(1);
+b1 = tiempo_picos(1);
 b2 = b1+periodo_beat;
 b3 = b2+periodo_beat;
 b4 = b3+periodo_beat;
@@ -242,20 +243,8 @@ end
 ##t=linspace(t_ini, t_fin,10000);
 pt = p_t (t, T, b1_n);
 
-#metromono 80beat
-#Con epsilon
-#T = 70
-#S = 0
-#b1 = 10
-#retval = -1860.6
 
-#Sin epsilon
-#T = 70
-#S = 0
-#b1 = 10
-#retval = inf
-
-figure();
+##figure();
 hold on
 plot(t,pt)
 title("Posicion probable donde se encuentran los cuarto-beats");
@@ -270,7 +259,8 @@ xlabel("Tiempo");
 ##S_values = linspace(0.5, 2, 10); % Reducir el rango y aumentar los pasos de S
 ##b0_values = linspace(0, 0.5, 10); % Reducir el rango y aumentar los pasos de b0s
 
-T_values = 70:10:120;
+##T_values = 70:10:120;
+T_values = Tempos;
 S_values = 0;
 b1_values=beats1;
 
@@ -319,40 +309,6 @@ disp(['Max Likelihood: ', num2str(max_likelihood)]);
 
 
 
-##% Calcular la función de verosimilitud para diferentes BPM
-##max_bpm = 140;
-##min_bpm = 70;
-##bps = (min_bpm:max_bpm) / 60;
-##L = zeros(length(bps), 1);
-##
-##for k = 1:length(bps)
-##  bpm = bps(k);
-##  interval = Fs / bpm; % Intervalo en muestras
-##  score = 0;
-##  for i = 1:length(picos_significativos)
-##    % Para cada pico, calcular la distancia a los múltiplos del intervalo
-##    distancias = abs(mod(picos_significativos(i) - picos_significativos(1), interval));
-##    % Considerar también la distancia al múltiplo siguiente para evitar errores de fase
-##    distancias = min(distancias, interval - distancias);
-##    % Sumar las probabilidades
-##    prob = exp(-distancias / (Fs / 4));
-##    score = score + sum(prob);
-##  endfor
-##  L(k) = score;
-##endfor
-##
-##[~, idx_max] = max(L);
-##BPM_estimado = bps(idx_max) * 60;
-##
-##figure(7);
-##plot((min_bpm:max_bpm), L);
-##xlabel('BPM');
-##ylabel('Likelihood');
-##title('Likelihood de diferentes BPM');
-##
-##disp(["El BPM estimado es: ", num2str(BPM_estimado)]);
-
-
 ##
 ##%========================== CALCULO SIMPLE DE BPM UTILIZANDO PROMEDIO ==========================
 ##%========================== DESCOMENTAR PARA PROBAR ============================================
@@ -366,80 +322,4 @@ disp(['Max Likelihood: ', num2str(max_likelihood)]);
 ##bpm = round(60 / promedio_intervalo_tiempo);
 ##
 ##disp(['El tempo de la canción es aproximadamente ', num2str(bpm), ' BPM']);
-##
-##
-##% Función p_t
-##function pt_value = pt(t_i, T, S, b_0)
-##  pt_value = exp(-((t_i - T) ^ 2) / (2 * S ^ 2)) / (S * sqrt(2 * pi));
-##endfunction
-##
-##% Función L_t
-##function log_likelihood = L_t(T, S, b_0, t_i_values)
-##  log_likelihood = sum(log(arrayfun(@(t_i) pt(t_i, T, S, b_0), t_i_values)));
-##endfunction
-##
-##% Discretización de las variables
-##T_values = [70:140];  % Reducción a 20 puntos
-##S_values = linspace(0.1, 5, 20); % Reducción a 20 puntos
-##b0_values = linspace(0, 1, 20);  % Reducción a 20 puntos
-##
-##t_i_values = tiempo_picos - t_ini; % Ajustar los valores de t_i para que correspondan a los picos detectados
-##
-##max_likelihood = -Inf;
-##best_T = T_values(1);
-##best_S = S_values(1);
-##best_b0 = b0_values(1);
-##
-##total_iterations = length(T_values) * length(S_values) * length(b0_values);
-##iteration = 0;
-##
-##for T = T_values
-##  for S = S_values
-##    for b1 = b0_values
-##      iteration++;
-##      likelihood = L_t(T, S, b1, t_i_values);
-##      if likelihood > max_likelihood
-##        max_likelihood = likelihood;
-##        best_T = T;
-##        best_S = S;
-##        best_b0 = b1;
-##      endif
-##      if mod(iteration, 100) == 0  % Imprimir progreso cada 100 iteraciones
-##        disp(['Iteración ', num2str(iteration), ' de ', num2str(total_iterations)]);
-##      endif
-##    endfor
-##  endfor
-##endfor
-##
-##disp(['Mejor T: ', num2str(best_T)]);
-##disp(['Mejor S: ', num2str(best_S)]);
-##disp(['Mejor b1: ', num2str(best_b0)]);
-##disp(['Max Likelihood: ', num2str(max_likelihood)]);
-
-##% Calculo de p_e(e)
-##t_values = linspace(-10, 10, 1000); % Asumiendo valores de tiempo para calcular p_t(t)
-##T = best_T;
-##S = best_S;
-##b_0 = best_b0;
-##
-##% Calculo de p_t(t)
-##p_t_values = arrayfun(@(t) pt(t, T, S, b_0), t_values);
-##
-##% Calculo de p_e(e) usando convolución
-##p_e_values = conv(p_t_values, flip(p_t_values), 'same');
-##
-##% Graficar p_t(t) y p_e(e)
-##figure(7);
-##subplot(2, 1, 1);
-##plot(t_values, p_t_values);
-##xlabel('Tiempo');
-##ylabel('p_t(t)');
-##title('Función de densidad de probabilidad p_t(t)');
-##
-##subplot(2, 1, 2);
-##plot(t_values, p_e_values);
-##xlabel('e');
-##ylabel('p_e(e)');
-##title('Función de densidad de probabilidad p_e(e)');
-
 
