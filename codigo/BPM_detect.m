@@ -3,7 +3,7 @@ clc; clear all; close all;
 ##variables (se pueden cambiar)
 duracion = 0.1; %cantidad de minutos a leer del archivo
 
-t_ini = 10; #Segundo que se comienza a analizar la cancion
+t_ini = 50; #Segundo que se comienza a analizar la cancion
 t_fin = 70; #Termina el analisis
 
 ## Codigo
@@ -259,8 +259,8 @@ xlabel("Tiempo");
 ##S_values = linspace(0.5, 2, 10); % Reducir el rango y aumentar los pasos de S
 ##b0_values = linspace(0, 0.5, 10); % Reducir el rango y aumentar los pasos de b0s
 
-##T_values = 70:10:120;
-T_values = Tempos;
+T_values = 70:10:140;
+##T_values = Tempos;
 S_values = 0;
 b1_values=beats1;
 
@@ -305,9 +305,6 @@ disp(['Max Likelihood: ', num2str(max_likelihood)]);
 
 
 %====================== Fin
-
-
-
 
 ##
 ##%========================== CALCULO SIMPLE DE BPM UTILIZANDO PROMEDIO ==========================
