@@ -3,8 +3,8 @@ clc; clear all; close all;
 ##variables (se pueden cambiar)
 duracion = 0.1; %cantidad de minutos a leer del archivo
 
-t_ini = 50; #Segundo que se comienza a analizar la cancion
-t_fin = 90; #Termina el analisis
+t_ini = 10; #Segundo que se comienza a analizar la cancion
+t_fin = 70; #Termina el analisis
 
 ## Codigo
 canciones = cargar_canciones();
@@ -244,9 +244,20 @@ end
 ##t=linspace(t_ini, t_fin,10000);
 pt = p_t (t, T, b1_n);
 
+#metromono 80beat
+#Con epsilon
+#T = 70
+#S = 0
+#b1 = 10
+#retval = -1860.6
 
-figure();
+#Sin epsilon
+#T = 70
+#S = 0
+#b1 = 10
+#retval = inf
 
+##figure();
 hold on
 plot(t,pt)
 title("Posicion probable donde se encuentran los cuarto-beats");
