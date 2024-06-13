@@ -3,8 +3,7 @@ function retval = p_t (t, T, b1_4)
   sigma = sqrt(0.05 * deltat);
   epsilon = 1e-10;  % Pequeño valor para evitar probabilidades cero
 
- %G = @(x) (1 / (sigma * sqrt(2 * pi))) * exp(-x.^2 / (2 * sigma^2)) + epsilon; %G con error
- G = @(x) ((1 / (sigma * sqrt(2 * pi))) * exp(-x.^2 / (2 * sigma^2)))/(1/sqrt(2*pi*sigma)) + epsilon; %G arreglada
+ G = @(x) ((1 / (sigma * sqrt(2 * pi))) * exp(-x.^2 / (2 * sigma^2)))/(1/(sqrt(2*pi)*sigma)) + epsilon; %G arreglada
 
   p = [0.4, 0.15, 0.3, 0.15];
   sum = 0;

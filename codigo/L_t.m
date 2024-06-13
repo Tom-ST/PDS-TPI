@@ -1,13 +1,6 @@
 function retval = L_t (T, S, b1, t_picos,t_ini,t_fin)
   periodo_beat = 60 / T;
 
-  b2 = b1+periodo_beat;
-  b3 = b2+periodo_beat;
-  b4 = b3+periodo_beat;
-
-  b1_4 = [b1 b2+periodo_beat*S b3 b4+periodo_beat*S];
-
-
   b1_n = b1;  % Inicializamos el primer beat
   beat = b1 + periodo_beat;  % Inicializamos el siguiente beat
 

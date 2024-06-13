@@ -1,0 +1,17 @@
+RESULTADOS CON SWING 0, 20 segundos de cancion
+
+Bad Bunny - Otra Noche en Miami90BPM -> 90 BPM                  Si
+DUKI - Rockstar 124BPM -> 123 BPM GOD                           Si
+Metallica - The Unforgiven 139BPM -> 139                        Si
+Post Malone - I Had Some Help 128 BPM -> 128 BPM                Si
+J Balvin, Bad Bunny - QUE PRETENDES 94BPM -> 116 BPM            No
+Drum_Track_100_Bpm -> 125 BPM                                   No
+
+
+Metronomo70BPM -> 140 BPM                                       No(Aunque como es exactamente el doble, se puede considerar correcto)
+Metronomo80BPM -> 80 BPM                                        Si
+Metronomo100BPM -> 100 BPM                                      Si
+Metronomo115BPM -> 115 BPM                                      Si
+Metronomo140BPM -> 140 BPM                                      Si
+
+

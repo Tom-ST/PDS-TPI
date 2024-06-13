@@ -182,113 +182,80 @@ tiempo_picos = (t_ini + 0.01) + picos_significativos * 0.01; % Convertimos los �
 
 
 
-%============================ Funcion de probabilidad ==================
-% La idea es probar en la funcion L_t distintas combinaciones de T, S ,y b1 hasta que se obtenga
-% la mayor likelihood
-
-% ---Avances--
-% La funcion p_t ya esta terminada, te da la distribucion de probabilidad de la ubicacion de los beats
-% la ubicacion de los beats 1 a 4 ya estan calculados
-
-% Tempos, Swings y beats1 son distintos valores que se van a tener que probar para maximizar la likelihood
-% por ahora conviene probar con un solo valor de esos
-% no cambiar los rangos que esos estan asi por el paper
-
-% ---Falta hacer--
-% 1.
-% en pt(end) el valor es 0 (hacer zoom en el grafico de las posiciones probables de los beats
-% no deberia bajar asi derecho, sino tomar el valor que corresponde en la campana de gauss. Corregir
-
-% 2.
-% Hay que terminar la funcion L_t que recibe (T, S, b1, t_picos) y da un valor numerico, no se por que me da -inf
-%CAMBIANDO P_T AGREGANDO UN EPSILON PARA QUE NO EVALUE EN 0 SE SOLUCIONA EL ERROR
-
-% una vez que de un numero, hay que probar todas las combinaciones posibles de T, b1 y S y el mayor L_t es el correcto
-
+%============================ Establecer rangos de T, S y b1 ==================
 Tempos = [70:140];
 Swings = [0:0.1:0.4]; %El swing (S) es un porcentaje que determina que tanto se atrasa el segundo y cuarto cuarto-beat (es una propiedad de algunos generos musicales como rock y jazz)
+##periodo_beat = 60 / T;
+##beats1 = linspace(0, periodo_beat, 32)+t_ini;
 
-
-tiempo_seleccionado = t_fin-t_ini;
-T = 100;
-S = Swings(1);
-periodo_beat = 60 / T;
-beats1 = linspace(0, periodo_beat, 32)+t_ini;
-b1 = beats1(1);
-b1 = tiempo_picos(1);
-b2 = b1+periodo_beat;
-b3 = b2+periodo_beat;
-b4 = b3+periodo_beat;
-
-b1_4 = [b1 b2+periodo_beat*S b3 b4+periodo_beat*S];
-
-b1_n = b1;  % Inicializamos el primer beat
-beat = b1 + periodo_beat;  % Inicializamos el siguiente beat
-
-% Generamos los beats adicionales hasta alcanzar o superar el tiempo t_fin
-while beat <= t_fin
-    b1_n = [b1_n, beat];
-    beat = beat + periodo_beat;  % Calculamos el siguiente beat
-end
-
-% Ajustamos los beats en las segundas y cuartas posiciones
-for i = 2:2:length(b1_n)
-    b1_n(i) = b1_n(i) + periodo_beat * S;
-end
-
-for i = 4:4:length(b1_n)
-    b1_n(i) = b1_n(i) + periodo_beat * S;
-end
-
-##t=linspace(t_ini, t_fin,10000);
-pt = p_t (t, T, b1_n);
-
-
-##figure();
-hold on
-plot(t,pt)
-title("Posicion probable donde se encuentran los cuarto-beats");
-xlabel("Tiempo");
+##T = 140;
+##S = Swings(1);
+##b1 = beats1(1);
+##b1 = tiempo_picos(1);
+##b2 = b1+periodo_beat;
+##b3 = b2+periodo_beat;
+##b4 = b3+periodo_beat;
+##
+##b1_4 = [b1 b2+periodo_beat*S b3 b4+periodo_beat*S];
+##
+##b1_n = b1;  % Inicializamos el primer beat
+##beat = b1 + periodo_beat;  % Inicializamos el siguiente beat
+##
+##% Generamos los beats adicionales hasta alcanzar o superar el tiempo t_fin
+##while beat <= t_fin
+##    b1_n = [b1_n, beat];
+##    beat = beat + periodo_beat;  % Calculamos el siguiente beat
+##end
+##
+##% Ajustamos los beats en las segundas y cuartas posiciones
+##for i = 2:2:length(b1_n)
+##    b1_n(i) = b1_n(i) + periodo_beat * S;
+##end
+##
+##for i = 4:4:length(b1_n)
+##    b1_n(i) = b1_n(i) + periodo_beat * S;
+##end
+##
+####t=linspace(t_ini, t_fin,10000);
+##pt = p_t (t, T, b1_n);
+##
+##
+####figure();
+##hold on
+##plot(t,pt)
+##title("Posicion probable donde se encuentran los cuarto-beats");
+##xlabel("Tiempo");
 
 
 
 %-------MAYOR LIKELIHOOD-----------------
-
-% Discretización de las variables
-##T_values = Tempos(1):10:Tempos(end); % Reducir el rango y aumentar los pasos de T
-##S_values = linspace(0.5, 2, 10); % Reducir el rango y aumentar los pasos de S
-##b0_values = linspace(0, 0.5, 10); % Reducir el rango y aumentar los pasos de b0s
-
-T_values = 70:1:140;
-##T_values = Tempos;
+##T_values = 70:1:140;
+T_values = Tempos;
+##S_values = Swings;
 S_values = 0;
-b1_values=beats1;
+##b1_values=beats1;
 
 max_likelihood = -Inf;
-best_T = T_values(1);
-best_S = S_values(1);
-best_b1 = b1_values(1);
+best_T = nan;
+best_S = nan;
+best_b1 = nan;
 
-total_iterations = length(T_values) * length(S_values) * length(b1_values);
+
 iteration = 0;
-likelihood_values = [];
 for i = 1:length(T_values)
-
+  periodo_beat = 60 / T_values(i);
+  beats1 = linspace(0, periodo_beat, 32)+t_ini;
+  b1_values=beats1;
+  total_iterations = length(T_values) * length(S_values) * length(b1_values);
     for j= 1:length(S_values)
-
       for k =1:length( b1_values)
-
-        % Añadir debug prints
-##            disp(['Iteración ', num2str(iteration), ': T = ', num2str(T_values(i)), ', S = ', num2str(S_values(j)), ', b1 = ', num2str(b1_values(k)), ', likelihood = ', num2str(likelihood)])
-
             iteration++;
             likelihood = L_t(T_values(i), S_values(j), b1_values(k), tiempo_picos,t_ini,t_fin);
-             likelihood_values = [likelihood_values, likelihood]; % Almacenar el valor de likelihood
             if likelihood > max_likelihood
                 max_likelihood = likelihood;
-                best_T = T_values(i);
-                best_S = S_values(j);
-                best_b1 = b1_values(k);
+                best_T = T_values(i)
+                best_S = S_values(j)
+                best_b1 = b1_values(k)
             endif
             if mod(iteration, 10) == 0
                 disp(['Iteración ', num2str(iteration), ' de ', num2str(total_iterations)]);
@@ -305,18 +272,4 @@ disp(['Max Likelihood: ', num2str(max_likelihood)]);
 
 
 %====================== Fin
-
-##
-##%========================== CALCULO SIMPLE DE BPM UTILIZANDO PROMEDIO ==========================
-##%========================== DESCOMENTAR PARA PROBAR ============================================
-##% Calculamos los intervalos de tiempo entre los picos consecutivos
-##intervalos_tiempo = diff(picos_significativos) * 0.01; % Convertimos los índices de picos a tiempo y calculamos los intervalos en segundos
-##
-##% Calculamos el promedio de los intervalos de tiempo
-##promedio_intervalo_tiempo = mean(intervalos_tiempo);
-##
-##% Convertimos el intervalo de tiempo promedio a BPM
-##bpm = round(60 / promedio_intervalo_tiempo);
-##
-##disp(['El tempo de la canción es aproximadamente ', num2str(bpm), ' BPM']);
 
