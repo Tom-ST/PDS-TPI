@@ -259,7 +259,7 @@ xlabel("Tiempo");
 ##S_values = linspace(0.5, 2, 10); % Reducir el rango y aumentar los pasos de S
 ##b0_values = linspace(0, 0.5, 10); % Reducir el rango y aumentar los pasos de b0s
 
-T_values = 70:10:140;
+T_values = 70:1:140;
 ##T_values = Tempos;
 S_values = 0;
 b1_values=beats1;
