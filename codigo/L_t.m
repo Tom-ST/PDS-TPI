@@ -27,10 +27,15 @@ function retval = L_t (T, S, b1, t_picos,t_ini,t_fin)
   end
 
 
-  sum = 0;
-  for i=1:length(t_picos)
-    sum += log(p_t(t_picos(i), T, b1_n));
-  endfor
-  retval = sum;
+##  sum = 0;
+##  for i=1:length(t_picos)
+##    sum += log(p_t(t_picos(i), T, b1_n));
+##  endfor
+##  retval = sum;
 
+    prod = 1;
+    for i=1:length(t_picos)
+      prod = prod *  p_t(t_picos(i), T, b1_n);
+    endfor
+    retval = log(prod);
 endfunction
