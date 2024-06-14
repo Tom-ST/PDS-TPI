@@ -176,11 +176,22 @@ xlabel("Tiempo (s)");
 ylabel("Amplitud");
 title("Picos identificados en la señal de audio");
 
+##%========================== CALCULO SIMPLE DE BPM UTILIZANDO PROMEDIO ==========================
+% Calculamos los intervalos de tiempo entre los picos consecutivos
+intervalos_tiempo = diff(picos_significativos) * 0.01; % Convertimos los índices de picos a tiempo y calculamos los intervalos en segundos
 
+% Calculamos el promedio de los intervalos de tiempo
+promedio_intervalo_tiempo = mean(intervalos_tiempo);
+
+% Convertimos el intervalo de tiempo promedio a BPM
+bpm_aprox = round(60 / promedio_intervalo_tiempo);
+
+disp(['El tempo de la canción es aproximadamente ', num2str(bpm_aprox), ' BPM']);
 
 %============================ Establecer rangos de T, S y b1 ==================
 Tempos = [70:140];
 Swings = [0:0.1:0.4]; %El swing (S) es un porcentaje que determina que tanto se atrasa el segundo y cuarto cuarto-beat (es una propiedad de algunos generos musicales como rock y jazz)
+% NO CAMBIAR, DEFINIDO POR EL PAPER
 
 % ==== A continuacion codigo para debuggear ==
 ##periodo_beat = 60 / T;
@@ -223,19 +234,11 @@ Swings = [0:0.1:0.4]; %El swing (S) es un porcentaje que determina que tanto se 
 
 
 %-------MAYOR LIKELIHOOD-----------------
-[T,S,b1,likelihood] = mejor_T_S_b1 (Tempos, 0, t_ini, t_fin, tiempo_picos)
+% Sin aproximacion
+##[T,S,b1,likelihood] = mejor_T_S_b1 (Tempos, 0, t_ini, t_fin, tiempo_picos)
+
+% Con aproximacion
+[T,S,b1,likelihood] = mejor_T_S_b1_con_aprox (Tempos, 0, t_ini, t_fin, tiempo_picos, bpm_aprox)
 %====================== Fin
 
-##
-##%========================== CALCULO SIMPLE DE BPM UTILIZANDO PROMEDIO ==========================
-##%========================== DESCOMENTAR PARA PROBAR ============================================
-##% Calculamos los intervalos de tiempo entre los picos consecutivos
-##intervalos_tiempo = diff(picos_significativos) * 0.01; % Convertimos los índices de picos a tiempo y calculamos los intervalos en segundos
-##
-##% Calculamos el promedio de los intervalos de tiempo
-##promedio_intervalo_tiempo = mean(intervalos_tiempo);
-##
-##% Convertimos el intervalo de tiempo promedio a BPM
-##bpm = round(60 / promedio_intervalo_tiempo);
-##
-##disp(['El tempo de la canción es aproximadamente ', num2str(bpm), ' BPM']);
+

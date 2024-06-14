@@ -1,12 +1,15 @@
-function [T,S,b1,likelihood] = mejor_T_S_b1 (T_values, S_values, t_ini, t_fin, tiempo_picos)
-  %Esta funcion analiza el likelihood de cada combinacion y devuelve los valores que la maximizan
-  %Recibe los valores de tempo y de swing, el de b1 se calcula
-  %Devuelve el mejor tempo, el mejor swing, el mejor b1 y el likelihood
+function [T,S,b1,likelihood] = mejor_T_S_b1 (T_values, S_values, t_ini, t_fin, tiempo_picos, T_aprox)
+  ajuste = 20; % cuantos beats por encima y debajo del T_aprox utilizar
 
   max_likelihood = -Inf;
   best_T = nan;
   best_S = nan;
   best_b1 = nan;
+
+
+  T_min = max(70, T_aprox - ajuste);
+  T_max = min(140, T_aprox + ajuste);
+  T_values = T_min:T_max;
 
   total_iterations = length(T_values) * length(S_values) * 32; %beats1 contiene 32 elementos
 
