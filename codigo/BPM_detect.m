@@ -273,3 +273,16 @@ disp(['Max Likelihood: ', num2str(max_likelihood)]);
 
 %====================== Fin
 
+##
+##%========================== CALCULO SIMPLE DE BPM UTILIZANDO PROMEDIO ==========================
+##%========================== DESCOMENTAR PARA PROBAR ============================================
+##% Calculamos los intervalos de tiempo entre los picos consecutivos
+##intervalos_tiempo = diff(picos_significativos) * 0.01; % Convertimos los índices de picos a tiempo y calculamos los intervalos en segundos
+##
+##% Calculamos el promedio de los intervalos de tiempo
+##promedio_intervalo_tiempo = mean(intervalos_tiempo);
+##
+##% Convertimos el intervalo de tiempo promedio a BPM
+##bpm = round(60 / promedio_intervalo_tiempo);
+##
+##disp(['El tempo de la canción es aproximadamente ', num2str(bpm), ' BPM']);
