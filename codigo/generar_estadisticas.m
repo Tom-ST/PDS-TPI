@@ -92,7 +92,6 @@ for cancion=1:1
     Swings = [0:0.1:0.4];
 
 
-
     %========================== sin aproximacion inicial ======================
 
     switch fragmento
@@ -146,15 +145,48 @@ for cancion=1:1
     resultados(columna) = T;
     resultados(columna+1) = tiempo;
   endfor
+  ##pkg load io
+  ##
+  ##filename = "../estadisticas.xlsx";
+  ##data = "prueba";
+  ##
+  ##
+  ##xlswrite(filename, data, 'Sheet1', 'A1');
 endfor
 
+resultados = cell(1,25);
+resultados{1} = 'nombre';
+resultados{2} = 1;
+resultados{3} = 1;
+resultados{4} = 1;
+resultados{5} = 1;
+resultados{6} = 1;
+resultados{7} = 1;
+resultados{8} = 1;
+resultados{9} = 1;
+resultados{10} = 1;
+resultados{11} = 1;
+resultados{12} = 1;
+resultados{13} = 1;
+resultados{14} = 1;
+resultados{15} = 1;
+resultados{16} = 1;
+resultados{17} = 1;
+resultados{18} = 1;
+resultados{19} = 1;
+resultados{20} = 1;
+resultados{21} = 1;
+resultados{22} = 1;
+resultados{23} = 1;
+resultados{24} = 1;
+resultados{25} = 1;
+resultados{26} = 1;
 
+##  pkg load io
+##
+##  filename = "../estadisticas.xlsx";
+##  data = "prueba";
+##
+##
+##  xlswrite(filename, data, 'Sheet1', 'A1');
 
-%
-##pkg load io
-##
-##filename = "../estadisticas.xlsx";
-##data = "prueba";
-##
-##
-##xlswrite(filename, data, 'Sheet1', 'A1');
