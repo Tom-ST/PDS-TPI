@@ -189,8 +189,5 @@ for cancion=1:length(canciones)
     porcentaje = (cancion / length(canciones)) * 100;
     % Actualizar la barra de progreso con el porcentaje y la información de cuántas canciones se han procesado y cuántas faltan
     waitbar(cancion / length(canciones), h, sprintf('%d / %d canciones (%.2f%% completado)', cancion, length(canciones), porcentaje));
-
-
-    h2 = waitbar(0, '0% procesada la cancion');
 endfor
 close(h);
