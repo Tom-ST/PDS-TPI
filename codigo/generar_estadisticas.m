@@ -180,7 +180,6 @@ resultados{22} = 1;
 resultados{23} = 1;
 resultados{24} = 1;
 resultados{25} = 1;
-resultados{26} = 1;
 
 ##  pkg load io
 ##
