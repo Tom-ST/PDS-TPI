@@ -19,11 +19,13 @@ t_ini = 50;
 ##  columna_TiempoEmpleado='G';
 fragmento_contador=0;
 
-for cancion=1:5
+vectorExcel = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z','AA','AB','AC','AD','AE','AF','AG','AH','AI','AJ','AK','AL','AM','AN','AO','AP','AQ'};
+
+for cancion=1:1
     disp("CANCION");
     resultados(1) = canciones{cancion};
     archivo_audio = strcat("../samples/",canciones{cancion})
-      for fragmento=5:5:30  %cambiando para ver si carga en seg 5
+      for fragmento=5:5%:30  %cambiando para ver si carga en seg 5
         fragmento_contador = fragmento_contador + 1;
         disp(sprintf("FRAGMENTO CONTADOR %d", fragmento_contador));
 
@@ -120,7 +122,7 @@ for cancion=1:5
               col_sin_aprox = 22;
         end
         tic();
-        [T,S,b1,likelihood] = mejor_T_S_b1 (Tempos, Swings, t_ini, t_fin, tiempo_picos);
+        [T,S,b1,likelihood] = mejor_T_S_b1 (Tempos, 0, t_ini, t_fin, tiempo_picos);
         tiempo = toc();
         resultados(col_sin_aprox) = T;
         resultados(col_sin_aprox+1) = tiempo;
@@ -151,12 +153,12 @@ for cancion=1:5
         % Convertimos el intervalo de tiempo promedio a BPM
         bpm_aprox = round(60 / promedio_intervalo_tiempo);
 
-        [T,S,b1,likelihood] = mejor_T_S_b1_con_aprox (Tempos, Swings, t_ini, t_fin, tiempo_picos, bpm_aprox);
+        [T,S,b1,likelihood] = mejor_T_S_b1_con_aprox (Tempos, 0, t_ini, t_fin, tiempo_picos, bpm_aprox);
         tiempo = toc();
         resultados(col_con_aprox) = T;
         resultados(col_con_aprox+1) = tiempo;
     endfor
-
+  pkg load io
    % Guardar los resultados en el archivo Excel en las celdas específicas
   filename = "../estadisticas.xlsx";
   sheet = 'Sheet1';
@@ -166,16 +168,34 @@ for cancion=1:5
   xlswrite(filename, resultados(1), sheet, strcat('B', num2str(row))); % Canción
 
     % Escribir los datos para cada fragmento (5, 10, 15, 20, 25, 30)
+
+
+
     for i = 0:5
+        disp(vectorExcel{5+i*6});
+    end
+
+    for i = 0:5
+        disp(vectorExcel{8+i*6});
+    end
+
+    for i = 0:5
+       colbpm_sinaprox = vectorExcel{5+i*6}
+       coltiempo_sinaprox = vectorExcel{5+i*6+1}
+
+       colbpm_conaprox = vectorExcel{8+i*6}
+       coltiempo_conaprox = vectorExcel{8+i*6+1}
+
+
         col_sin_aprox = 2 + i * 4;
         col_con_aprox = col_sin_aprox + 2;
 
-        xlswrite(filename, resultados{col_sin_aprox}, sheet, strcat(char('E' + i*6), num2str(row))); % BPM detectado (sin aproximación inicial)
-        xlswrite(filename, resultados{col_sin_aprox + 1}, sheet, strcat(char('F' + i*6), num2str(row))); % Tiempo empleado (sin aproximación inicial)
+        xlswrite(filename, resultados{col_sin_aprox}, sheet, colbpm_sinaprox, num2str(row)); % BPM detectado (sin aproximación inicial)
+        xlswrite(filename, resultados{col_sin_aprox + 1}, sheet, coltiempo_sinaprox, num2str(row)); % Tiempo empleado (sin aproximación inicial)
         % Acierto se deja vacío intencionalmente
 
-        xlswrite(filename, resultados{col_con_aprox}, sheet, strcat(char('H' + i*6), num2str(row))); % BPM detectado (con aproximación inicial)
-        xlswrite(filename, resultados{col_con_aprox + 1}, sheet, strcat(char('I' + i*6), num2str(row))); % Tiempo empleado (con aproximación inicial)
+        xlswrite(filename, resultados{col_con_aprox}, sheet, colbpm_conaprox, num2str(row)); % BPM detectado (con aproximación inicial)
+        xlswrite(filename, resultados{col_con_aprox + 1}, sheet, coltiempo_conaprox, num2str(row)); % Tiempo empleado (con aproximación inicial)
         % Acierto se deja vacío intencionalmente
     end
 endfor
