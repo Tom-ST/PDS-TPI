@@ -1,34 +1,30 @@
 %necesita el paquete io: pkg install -forge io
 ####pkg install -forge io
-##pkg load io;
-pkg load signal
+pkg load signal;
+pkg load io;
 clc; clear all; close all;
 
 resultados = cell(1,25);
 
 %cargar canciones
 canciones = cargar_canciones();
-##canciones = {"Metronomo70BPM.mp3"}
-
 
 %ELEGIR SOLO CANCIONES DE 1:20 MINUTOS O MAS
 t_ini = 50;
 
-##  columna_nombre='B';
-##  columna_BPMDetectado='E';
-##  columna_TiempoEmpleado='G';
-fragmento_contador=0;
 
 vectorExcel = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z','AA','AB','AC','AD','AE','AF','AG','AH','AI','AJ','AK','AL','AM','AN','AO','AP','AQ'};
 
-for cancion=1:1
+% Inicializar la barra de progreso
+h = waitbar(0, '0% procesado de todas las canciones');
+
+
+
+for cancion=1:length(canciones)
     disp("CANCION");
     resultados(1) = canciones{cancion};
     archivo_audio = strcat("../samples/",canciones{cancion})
-      for fragmento=5:5%:30  %cambiando para ver si carga en seg 5
-        fragmento_contador = fragmento_contador + 1;
-        disp(sprintf("FRAGMENTO CONTADOR %d", fragmento_contador));
-
+      for fragmento=5:5:30  %cambiando para ver si carga en seg 5
         t_fin = t_ini+fragmento;
 
         % Cargar la cantidad de minutos especificados
@@ -169,70 +165,31 @@ for cancion=1:1
 
     % Escribir los datos para cada fragmento (5, 10, 15, 20, 25, 30)
 
-
-
     for i = 0:5
-        disp(vectorExcel{5+i*6});
-    end
+       colbpm_sinaprox = vectorExcel{5+i*6};
+       coltiempo_sinaprox = vectorExcel{5+i*6+1};
 
-    for i = 0:5
-        disp(vectorExcel{8+i*6});
-    end
-
-    for i = 0:5
-       colbpm_sinaprox = vectorExcel{5+i*6}
-       coltiempo_sinaprox = vectorExcel{5+i*6+1}
-
-       colbpm_conaprox = vectorExcel{8+i*6}
-       coltiempo_conaprox = vectorExcel{8+i*6+1}
+       colbpm_conaprox = vectorExcel{8+i*6};
+       coltiempo_conaprox = vectorExcel{8+i*6+1};
 
 
         col_sin_aprox = 2 + i * 4;
         col_con_aprox = col_sin_aprox + 2;
-
-        xlswrite(filename, resultados{col_sin_aprox}, sheet, colbpm_sinaprox, num2str(row)); % BPM detectado (sin aproximación inicial)
-        xlswrite(filename, resultados{col_sin_aprox + 1}, sheet, coltiempo_sinaprox, num2str(row)); % Tiempo empleado (sin aproximación inicial)
+        xlswrite(filename, resultados{col_sin_aprox}, sheet, strcat(colbpm_sinaprox, num2str(row))); % BPM detectado (sin aproximación inicial)
+        xlswrite(filename, resultados{col_sin_aprox + 1}, sheet, strcat(coltiempo_sinaprox, num2str(row))); % Tiempo empleado (sin aproximación inicial)
         % Acierto se deja vacío intencionalmente
 
-        xlswrite(filename, resultados{col_con_aprox}, sheet, colbpm_conaprox, num2str(row)); % BPM detectado (con aproximación inicial)
-        xlswrite(filename, resultados{col_con_aprox + 1}, sheet, coltiempo_conaprox, num2str(row)); % Tiempo empleado (con aproximación inicial)
+        xlswrite(filename, resultados{col_con_aprox}, sheet, strcat(colbpm_conaprox, num2str(row))); % BPM detectado (con aproximación inicial)
+        xlswrite(filename, resultados{col_con_aprox + 1}, sheet, strcat(coltiempo_conaprox, num2str(row))); % Tiempo empleado (con aproximación inicial)
         % Acierto se deja vacío intencionalmente
     end
+
+    % Calcular el porcentaje completado
+    porcentaje = (cancion / length(canciones)) * 100;
+    % Actualizar la barra de progreso con el porcentaje y la información de cuántas canciones se han procesado y cuántas faltan
+    waitbar(cancion / length(canciones), h, sprintf('%d / %d canciones (%.2f%% completado)', cancion, length(canciones), porcentaje));
+
+
+    h2 = waitbar(0, '0% procesada la cancion');
 endfor
-
-
-##resultados = cell(1,25);
-##resultados{1} = 'nombre';
-##resultados{2} = 1;
-##resultados{3} = 1;
-##resultados{4} = 1;
-##resultados{5} = 1;
-##resultados{6} = 1;
-##resultados{7} = 1;
-##resultados{8} = 1;
-##resultados{9} = 1;
-##resultados{10} = 1;
-##resultados{11} = 1;
-##resultados{12} = 1;
-##resultados{13} = 1;
-##resultados{14} = 1;
-##resultados{15} = 1;
-##resultados{16} = 1;
-##resultados{17} = 1;
-##resultados{18} = 1;
-##resultados{19} = 1;
-##resultados{20} = 1;
-##resultados{21} = 1;
-##resultados{22} = 1;
-##resultados{23} = 1;
-##resultados{24} = 1;
-##resultados{25} = 1;
-
-##  pkg load io
-##
-##  filename = "../estadisticas.xlsx";
-##  data = "prueba";
-##
-##
-##  xlswrite(filename, data, 'Sheet1', 'A1');
-
+close(h);
