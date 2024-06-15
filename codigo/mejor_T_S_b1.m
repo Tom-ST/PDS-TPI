@@ -25,7 +25,7 @@ function [T,S,b1,likelihood] = mejor_T_S_b1 (T_values, S_values, t_ini, t_fin, t
           best_b1 = b1_values(k);
         endif
         if mod(iteration, 10) == 0
-##          disp(['Iteración ', num2str(iteration), ' de ', num2str(total_iterations)]);
+          disp(['Iteración ', num2str(iteration), ' de ', num2str(total_iterations)]);
         endif
       endfor
     endfor

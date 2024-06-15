@@ -25,6 +25,7 @@ for cancion=1:length(canciones)
     resultados(1) = canciones{cancion};
     archivo_audio = strcat("../samples/",canciones{cancion})
       for fragmento=5:5%:30  %cambiando para ver si carga en seg 5
+        tic();
         t_fin = t_ini+fragmento;
 
         % Cargar la cantidad de minutos especificados
@@ -100,7 +101,7 @@ for cancion=1:length(canciones)
 
         Tempos = [70:140];
         Swings = [0:0.1:0.4];
-
+        tiempo_inicial = toc();
 
         %========================== sin aproximacion inicial ======================
 
@@ -122,7 +123,7 @@ for cancion=1:length(canciones)
         [T,S,b1,likelihood] = mejor_T_S_b1 (Tempos, 0, t_ini, t_fin, tiempo_picos);
         tiempo = toc();
         resultados(col_sin_aprox) = T;
-        resultados(col_sin_aprox+1) = tiempo;
+        resultados(col_sin_aprox+1) = tiempo+tiempo_inicial;
 
 
         %========================= con aproximacion inicial (ARRANCAR RELOJ) ========================
@@ -153,9 +154,9 @@ for cancion=1:length(canciones)
         [T,S,b1,likelihood] = mejor_T_S_b1_con_aprox (Tempos, 0, t_ini, t_fin, tiempo_picos, bpm_aprox);
         tiempo = toc();
         resultados(col_con_aprox) = T;
-        resultados(col_con_aprox+1) = tiempo;
+        resultados(col_con_aprox+1) = tiempo+tiempo_inicial;
     endfor
-  pkg load io
+
    % Guardar los resultados en el archivo Excel en las celdas específicas
   filename = "../estadisticas.xlsx";
   sheet = 'Sheet1';
