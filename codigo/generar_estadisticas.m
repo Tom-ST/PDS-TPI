@@ -45,6 +45,7 @@ for cancion=1:length(canciones)
 
         ## Funcion de compresion
         C = @(x) sqrt(x);
+        C = @(x) sqrt(x);
 
         num_ventanas = fix(length(y) / tam_ventana_m);
 
