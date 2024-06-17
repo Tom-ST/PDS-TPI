@@ -20,10 +20,10 @@ h = waitbar(0, '0% procesado de todas las canciones');
 
 
 
-for cancion=1:length(canciones)
+for cancion=74:78%1:length(canciones)
     resultados(1) = canciones{cancion};
     archivo_audio = strcat("../samples/",canciones{cancion})
-      for fragmento=5:5:30  %cambiando para ver si carga en seg 5
+      for fragmento=30%:5:10  %cambiando para ver si carga en seg 5
         tic();
         t_fin = t_ini+fragmento;
 
